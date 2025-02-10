@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
     try {
-        const { title } = await request.json()
+        const { title, note } = await request.json()
         
         // Generate a random 6-character code
         const code = Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -14,6 +14,7 @@ export async function POST(request: Request) {
                 { 
                     title,
                     code,
+                    note,
                 }
             ])
             .select()
