@@ -1,3 +1,5 @@
+'use client';
+
 import {
     Card,
     CardContent,
@@ -6,12 +8,13 @@ import {
     CardDescription,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ScrapbookDetailsProps {
     title: string;
-    setTitle: (value: string) => void;
+    setTitle: (title: string) => void;
     note: string;
-    setNote: (value: string) => void;
+    setNote: (note: string) => void;
 }
 
 export function ScrapbookDetails({
@@ -20,6 +23,9 @@ export function ScrapbookDetails({
     note,
     setNote,
 }: ScrapbookDetailsProps) {
+    const maxNoteLength = 1000; // Longer limit for the note
+    const noteCharCount = note.length;
+
     return (
         <Card className="border-pink-100 shadow-md">
             <CardHeader>
@@ -32,19 +38,34 @@ export function ScrapbookDetails({
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
+                    <label htmlFor="title" className="text-sm font-medium text-gray-700">
+                        Title
+                    </label>
                     <Input
+                        id="title"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        type="text"
-                        placeholder="Enter a romantic title"
-                        className="border-pink-200 focus-visible:ring-pink-500"
+                        placeholder="Enter a title for your scrapbook"
+                        className="w-full"
+                        maxLength={100}
                     />
-                    <textarea
+                </div>
+
+                <div className="space-y-2">
+                    <label htmlFor="note" className="text-sm font-medium text-gray-700">
+                        Note (Optional)
+                    </label>
+                    <Textarea
+                        id="note"
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
-                        placeholder="Write a sweet note... (optional)"
-                        className="w-full h-24 px-3 py-2 rounded-md border border-pink-200 focus-visible:ring-pink-500 focus:outline-none focus:ring-2 resize-none"
+                        placeholder="Write a note to accompany your photos..."
+                        className="min-h-[150px] resize-none"
+                        maxLength={maxNoteLength}
                     />
+                    <div className="text-sm text-gray-500 text-right">
+                        {noteCharCount}/{maxNoteLength} characters
+                    </div>
                 </div>
             </CardContent>
         </Card>

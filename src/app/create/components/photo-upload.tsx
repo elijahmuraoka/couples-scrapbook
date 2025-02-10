@@ -9,21 +9,26 @@ import {
     CardTitle,
     CardDescription,
 } from '@/components/ui/card';
+import EXIF from 'exif-js';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 
 interface PhotoUploadProps {
     selectedFiles: File[];
-    setSelectedFiles: (files: File[]) => void;
-    setPreviews: (urls: string[]) => void;
+    setSelectedFiles: React.Dispatch<React.SetStateAction<File[]>>;
+    setPreviews: React.Dispatch<React.SetStateAction<string[]>>;
+    setMetadata: React.Dispatch<React.SetStateAction<any[]>>;
+    setCaptions: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export function PhotoUpload({
     selectedFiles,
     setSelectedFiles,
     setPreviews,
+    setMetadata,
+    setCaptions,
 }: PhotoUploadProps) {
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
         const totalFiles = selectedFiles.length + files.length;
 
@@ -41,9 +46,7 @@ export function PhotoUpload({
         }
 
         // Validate file sizes
-        const invalidFiles = files.filter(
-            (file) => file.size > MAX_FILE_SIZE
-        );
+        const invalidFiles = files.filter((file) => file.size > MAX_FILE_SIZE);
         if (invalidFiles.length > 0) {
             toast.error(
                 `Some files exceed the 10MB limit: ${invalidFiles
@@ -61,12 +64,32 @@ export function PhotoUpload({
             return;
         }
 
-        // Add new files to existing ones
-        setSelectedFiles((prev) => [...prev, ...files]);
+        // Extract metadata and create previews
+        const photosWithMetadata = await Promise.all(
+            files.map(async (file) => {
+                const metadata = await extractMetadata(file);
+                const preview = URL.createObjectURL(file);
+                return { file, preview, metadata };
+            })
+        );
 
-        // Generate and add new previews
-        const newPreviews = files.map((file) => URL.createObjectURL(file));
-        setPreviews((prev) => [...prev, ...newPreviews]);
+        // Add new files and metadata
+        setSelectedFiles((prev: File[]) => [
+            ...prev,
+            ...photosWithMetadata.map((p) => p.file),
+        ]);
+        setPreviews((prev: string[]) => [
+            ...prev,
+            ...photosWithMetadata.map((p) => p.preview),
+        ]);
+        setMetadata((prev: any[]) => [
+            ...prev,
+            ...photosWithMetadata.map((p) => p.metadata),
+        ]);
+        setCaptions((prev: string[]) => [
+            ...prev,
+            ...Array(files.length).fill(''),
+        ]);
 
         // Reset input value to allow selecting the same file again
         if (e.target) {
@@ -74,12 +97,48 @@ export function PhotoUpload({
         }
     };
 
+    const extractMetadata = async (file: File) => {
+        return new Promise<{ location?: string; takenAt?: Date }>((resolve) => {
+            EXIF.getData(file as any, function (this: any) {
+                const exifData = EXIF.getAllTags(this);
+
+                // Parse the date properly from EXIF
+                let takenAt: Date | undefined;
+                if (exifData?.DateTimeOriginal) {
+                    // EXIF date format is "YYYY:MM:DD HH:MM:SS"
+                    const [date, time] = exifData.DateTimeOriginal.split(' ');
+                    const [year, month, day] = date.split(':');
+                    const [hour, minute, second] = time.split(':');
+                    takenAt = new Date(
+                        year,
+                        month - 1,
+                        day,
+                        hour,
+                        minute,
+                        second
+                    );
+                } else if (file.lastModified) {
+                    // Fallback to file's last modified date
+                    takenAt = new Date(file.lastModified);
+                }
+
+                resolve({
+                    location: exifData?.GPSLatitude
+                        ? `${exifData.GPSLatitude}, ${exifData.GPSLongitude}`
+                        : undefined,
+                    takenAt:
+                        takenAt && !isNaN(takenAt.getTime())
+                            ? takenAt
+                            : undefined,
+                });
+            });
+        });
+    };
+
     return (
         <Card className="border-pink-100 shadow-md overflow-hidden">
             <CardHeader>
-                <CardTitle className="text-gray-800">
-                    Upload Photos
-                </CardTitle>
+                <CardTitle className="text-gray-800">Upload Photos</CardTitle>
                 <CardDescription className="flex flex-col items-center">
                     <span>Add up to 10 of your favorite moments</span>
                 </CardDescription>
@@ -122,4 +181,4 @@ export function PhotoUpload({
             </CardContent>
         </Card>
     );
-} 
+}

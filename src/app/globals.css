@@ -64,6 +64,18 @@ body {
         --chart-4: 280 65% 60%;
         --chart-5: 340 75% 55%;
     }
+    .font-handwriting {
+        font-family: 'Homemade Apple', cursive;
+    }
+    
+    .bg-cream-paper {
+        background-color: #FFFDF5;
+    }
+    
+    .bg-washi-tape {
+        background: linear-gradient(45deg, rgba(255,192,203,0.6), rgba(255,182,193,0.6));
+        backdrop-filter: blur(4px);
+    }
 }
 
 @layer base {
@@ -135,6 +147,19 @@ body {
     100% {
         transform: scale(1);
     }
+}
+
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin-slow {
+    animation: spin-slow 20s linear infinite;
 }
 
 @layer utilities {
