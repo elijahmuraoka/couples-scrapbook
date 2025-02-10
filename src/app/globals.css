@@ -3,90 +3,143 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    :root {
+        --background: 0 0% 100%;
+        --foreground: 240 10% 3.9%;
 
-    /* Romantic pink theme */
-    --primary: 342 75% 55%;
-    --primary-foreground: 355 100% 97%;
+        /* Romantic pink theme */
+        --primary: 342 75% 55%;
+        --primary-foreground: 355 100% 97%;
 
-    /* Soft pink for secondary actions */
-    --secondary: 342 45% 94%;
-    --secondary-foreground: 342 65% 45%;
+        /* Soft pink for secondary actions */
+        --secondary: 342 45% 94%;
+        --secondary-foreground: 342 65% 45%;
 
-    /* Card and muted colors */
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --muted: 342 15% 95%;
-    --muted-foreground: 342 5% 45%;
+        /* Card and muted colors */
+        --card: 0 0% 100%;
+        --card-foreground: 240 10% 3.9%;
+        --muted: 342 15% 95%;
+        --muted-foreground: 342 5% 45%;
 
-    /* Accent colors */
-    --accent: 342 45% 94%;
-    --accent-foreground: 342 65% 45%;
+        /* Accent colors */
+        --accent: 342 45% 94%;
+        --accent-foreground: 342 65% 45%;
 
-    /* Other utility colors */
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --border: 342 20% 87%;
-    --input: 342 20% 87%;
-    --ring: 342 75% 55%;
-    
-    --radius: 0.75rem;
-  }
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
+        /* Other utility colors */
+        --popover: 0 0% 100%;
+        --popover-foreground: 240 10% 3.9%;
+        --border: 342 20% 87%;
+        --input: 342 20% 87%;
+        --ring: 342 75% 55%;
+
+        --radius: 0.75rem;
+    }
+    .dark {
+        --background: 240 10% 3.9%;
+        --foreground: 0 0% 98%;
+        --card: 240 10% 3.9%;
+        --card-foreground: 0 0% 98%;
+        --popover: 240 10% 3.9%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 0 0% 98%;
+        --primary-foreground: 240 5.9% 10%;
+        --secondary: 240 3.7% 15.9%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 240 3.7% 15.9%;
+        --muted-foreground: 240 5% 64.9%;
+        --accent: 240 3.7% 15.9%;
+        --accent-foreground: 0 0% 98%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 3.7% 15.9%;
+        --input: 240 3.7% 15.9%;
+        --ring: 240 4.9% 83.9%;
+        --chart-1: 220 70% 50%;
+        --chart-2: 160 60% 45%;
+        --chart-3: 30 80% 55%;
+        --chart-4: 280 65% 60%;
+        --chart-5: 340 75% 55%;
+    }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    background-image: 
-      radial-gradient(at 50% 0%, rgba(255, 182, 193, 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(255, 192, 203, 0.1) 0px, transparent 50%);
-    background-attachment: fixed;
-  }
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+        background-image: radial-gradient(
+                at 50% 0%,
+                rgba(255, 182, 193, 0.1) 0px,
+                transparent 50%
+            ),
+            radial-gradient(
+                at 100% 0%,
+                rgba(255, 192, 203, 0.1) 0px,
+                transparent 50%
+            );
+        background-attachment: fixed;
+    }
 }
 
 /* Custom animations */
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
 }
 
 .animate-float {
-  animation: float 3s ease-in-out infinite;
+    animation: float 3s ease-in-out infinite;
 }
 
+@keyframes slideUpAndFade {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@layer utilities {
+    .ease-spring {
+        /* Less bouncy, faster to end, snappier overall */
+        transition-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+}
