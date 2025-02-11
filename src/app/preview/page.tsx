@@ -13,7 +13,6 @@ export default function PreviewPage() {
     const router = useRouter();
     const { draft, clearDraft } = useScrapbookStore();
     const [isPublishing, setIsPublishing] = useState(false);
-    const [autoPlayMusic, setAutoPlayMusic] = useState(true);
 
     useEffect(() => {
         if (!isPublishing && !draft.title && draft.selectedFiles.length === 0) {
@@ -115,7 +114,7 @@ export default function PreviewPage() {
                                 <MusicPlayer
                                     songId={draft.selectedSongId}
                                     className="bg-white shadow-sm border border-pink-100 rounded-lg"
-                                    autoPlay={autoPlayMusic}
+                                    autoPlay={true}
                                 />
                             )}
                             <Button

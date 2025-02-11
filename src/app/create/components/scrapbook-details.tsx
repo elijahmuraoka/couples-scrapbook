@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Book } from 'lucide-react';
 
@@ -76,7 +75,10 @@ export function ScrapbookDetails({
                 </div>
 
                 <div className="space-y-2">
-                    <label htmlFor="note" className="text-sm font-medium text-gray-700">
+                    <label
+                        htmlFor="note"
+                        className="text-sm font-medium text-gray-700"
+                    >
                         Note (Optional)
                     </label>
                     <Textarea
@@ -94,4 +96,4 @@ export function ScrapbookDetails({
             </CardContent>
         </Card>
     );
-} 
+}

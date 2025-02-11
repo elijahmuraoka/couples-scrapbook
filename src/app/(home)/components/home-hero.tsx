@@ -10,7 +10,7 @@ export function HomeHero() {
                 A Gift From Your Broke But Loving Partner
             </h1>
             <p className="text-gray-600 lg:text-lg italic">
-                "I have no money, but at least I love you."
+                &quot;I have no money, but at least I love you.&quot;
             </p>
         </div>
     );

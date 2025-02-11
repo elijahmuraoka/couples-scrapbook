@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
             const fileName = `${scrapbook.id}/${Date.now()}-${index}.jpg`;
 
-            const { data: uploadData, error: uploadError } =
+            const { error: uploadError } =
                 await supabase.storage
                     .from('photos')
                     .upload(fileName, fileData, {

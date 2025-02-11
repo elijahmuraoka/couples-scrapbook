@@ -43,6 +43,19 @@ export function PhotoUpload({
             return;
         }
 
+        // Filter out files larger than 10MB
+        files.filter((file) => {
+            if (file.size > MAX_FILE_SIZE) {
+                alert(
+                    `File ${file.name} is too large. Maximum size is ${
+                        MAX_FILE_SIZE / (1024 * 1024)
+                    }MB`
+                );
+                return false;
+            }
+            return true;
+        });
+
         // Create object URLs for previews
         const newPreviews = files.map((file) => URL.createObjectURL(file));
 

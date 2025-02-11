@@ -70,7 +70,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
         if (!isPreviewPage && (!photos || photos.length === 0)) {
             router.push('/');
         }
-    }, [photos, router]);
+    }, [photos, router, pathname]);
 
     if (!photos || photos.length === 0) {
         throw new Error('No photos found rendering scrapbook');
