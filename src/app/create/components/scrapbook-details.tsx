@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Pencil } from 'lucide-react';
 
 interface ScrapbookDetailsProps {
     title: string;
@@ -29,12 +30,19 @@ export function ScrapbookDetails({
     return (
         <Card className="border-pink-100 shadow-md">
             <CardHeader>
-                <CardTitle className="text-gray-800">
-                    Scrapbook Details
-                </CardTitle>
-                <CardDescription>
-                    Give your love story a title
-                </CardDescription>
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-pink-50 rounded-lg">
+                        <Pencil className="w-5 h-5 text-pink-500" />
+                    </div>
+                    <div>
+                        <CardTitle className="text-xl text-gray-800">
+                            Scrapbook Details
+                        </CardTitle>
+                        <CardDescription>
+                            Give your scrapbook a title and add a personal note
+                        </CardDescription>
+                    </div>
+                </div>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">

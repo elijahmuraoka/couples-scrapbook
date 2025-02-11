@@ -1,9 +1,9 @@
-interface SubmitButtonProps {
+interface PreviewButtonProps {
     onClick: () => Promise<void>;
     isLoading: boolean;
 }
 
-export function SubmitButton({ onClick, isLoading }: SubmitButtonProps) {
+export function PreviewButton({ onClick, isLoading }: PreviewButtonProps) {
     return (
         <div className="flex justify-center pt-4">
             <button
@@ -19,7 +19,7 @@ export function SubmitButton({ onClick, isLoading }: SubmitButtonProps) {
                     ${isLoading ? 'animate-pulse' : ''}
                 `}
             >
-                {isLoading ? 'Creating...' : 'Create Scrapbook'}
+                {isLoading ? 'Loading Preview...' : 'Preview Scrapbook'}
             </button>
         </div>
     );

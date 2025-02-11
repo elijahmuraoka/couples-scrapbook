@@ -10,7 +10,15 @@ import {
     CardDescription,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { X, GripVertical, Calendar, MapPin, Maximize2 } from 'lucide-react';
+import {
+    X,
+    GripVertical,
+    Calendar,
+    MapPin,
+    Maximize2,
+    Images,
+    Trash2,
+} from 'lucide-react';
 import {
     DndContext,
     closestCenter,
@@ -37,15 +45,13 @@ import { VisuallyHidden } from '@/components/ui/visually-hidden';
 
 interface SelectedPhotosProps {
     selectedFiles: File[];
-    setSelectedFiles: React.Dispatch<React.SetStateAction<File[]>>;
+    setSelectedFiles: (files: File[]) => void;
     previews: string[];
-    setPreviews: React.Dispatch<React.SetStateAction<string[]>>;
+    setPreviews: (urls: string[]) => void;
     captions: string[];
-    setCaptions: React.Dispatch<React.SetStateAction<string[]>>;
+    setCaptions: (captions: string[]) => void;
     metadata: Array<{ location?: string; takenAt?: Date }>;
-    setMetadata: React.Dispatch<
-        React.SetStateAction<Array<{ location?: string; takenAt?: Date }>>
-    >;
+    setMetadata: (meta: Array<{ location?: string; takenAt?: Date }>) => void;
 }
 
 interface SortablePhotoItemProps {
@@ -85,7 +91,7 @@ function SortablePhotoItem({
         zIndex: isDragging ? 50 : 0,
     };
 
-    const maxCaptionLength = 200;
+    const maxCaptionLength = 50;
     const [showFullscreen, setShowFullscreen] = useState(false);
 
     return (
@@ -152,22 +158,20 @@ function SortablePhotoItem({
                                         </span>
                                     </div>
                                 )}
-                                {metadata.takenAt &&
-                                    !isNaN(metadata.takenAt.getTime()) && (
-                                        <div className="flex items-center gap-1">
-                                            <Calendar className="w-3 h-3" />
-                                            <span>
-                                                {metadata.takenAt.toLocaleDateString(
-                                                    undefined,
-                                                    {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                    }
-                                                )}
-                                            </span>
-                                        </div>
-                                    )}
+                                {metadata.takenAt && (
+                                    <div className="flex items-center gap-1">
+                                        <Calendar className="w-3 h-3" />
+                                        <span>
+                                            {new Date(
+                                                metadata.takenAt
+                                            ).toLocaleDateString(undefined, {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric',
+                                            })}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -193,9 +197,9 @@ function SortablePhotoItem({
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={onRemove}
-                    className="self-start text-gray-400 hover:text-red-500 p-1.5 rounded-full hover:bg-red-50 transition-colors"
+                    className="self-start text-gray-400 hover:text-red-500 p-1.5 rounded-full hover:bg-red-50/80 transition-colors"
                 >
-                    <X className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4" />
                 </motion.button>
             </motion.div>
 
@@ -224,22 +228,20 @@ function SortablePhotoItem({
                                         <span>{metadata.location}</span>
                                     </div>
                                 )}
-                                {metadata?.takenAt &&
-                                    !isNaN(metadata.takenAt.getTime()) && (
-                                        <div className="flex items-center gap-1">
-                                            <Calendar className="w-4 h-4" />
-                                            <span>
-                                                {metadata.takenAt.toLocaleDateString(
-                                                    undefined,
-                                                    {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                    }
-                                                )}
-                                            </span>
-                                        </div>
-                                    )}
+                                {metadata?.takenAt && (
+                                    <div className="flex items-center gap-1">
+                                        <Calendar className="w-4 h-4" />
+                                        <span>
+                                            {new Date(
+                                                metadata.takenAt
+                                            ).toLocaleDateString(undefined, {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric',
+                                            })}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -292,38 +294,57 @@ export function SelectedPhotos({
             const oldIndex = parseInt(active.id.split('-')[1]);
             const newIndex = parseInt(over.id.split('-')[1]);
 
-            setSelectedFiles((files: File[]) =>
-                arrayMove(files, oldIndex, newIndex)
-            );
-            setPreviews((items: string[]) =>
-                arrayMove(items, oldIndex, newIndex)
-            );
-            setCaptions((items: string[]) =>
-                arrayMove(items, oldIndex, newIndex)
-            );
-            setMetadata((items) => arrayMove(items, oldIndex, newIndex));
+            const newFiles = arrayMove([...selectedFiles], oldIndex, newIndex);
+            const newPreviews = arrayMove([...previews], oldIndex, newIndex);
+            const newCaptions = arrayMove([...captions], oldIndex, newIndex);
+            const newMetadata = arrayMove([...metadata], oldIndex, newIndex);
+
+            setSelectedFiles(newFiles);
+            setPreviews(newPreviews);
+            setCaptions(newCaptions);
+            setMetadata(newMetadata);
         }
+    };
+
+    const handleRemove = (index: number) => {
+        // Revoke the object URL to prevent memory leaks
+        URL.revokeObjectURL(previews[index]);
+
+        const newFiles = [...selectedFiles];
+        const newPreviews = [...previews];
+        const newCaptions = [...captions];
+        const newMetadata = [...metadata];
+
+        newFiles.splice(index, 1);
+        newPreviews.splice(index, 1);
+        newCaptions.splice(index, 1);
+        newMetadata.splice(index, 1);
+
+        setSelectedFiles(newFiles);
+        setPreviews(newPreviews);
+        setCaptions(newCaptions);
+        setMetadata(newMetadata);
     };
 
     return (
         <Card className="border-pink-100 shadow-md">
             <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-pink-50 rounded-lg">
+                        <Images className="w-5 h-5 text-pink-500" />
+                    </div>
                     <div>
-                        <CardTitle className="text-gray-800">
+                        <CardTitle className="text-xl text-gray-800">
                             Arrange Your Photos
                         </CardTitle>
                         <CardDescription>
                             Drag to reorder • {selectedFiles.length}/10 photos
                         </CardDescription>
                     </div>
-                    <div className="text-sm text-gray-500">
-                        Photos will appear in this order
-                    </div>
                 </div>
                 <Progress
                     value={(selectedFiles.length / 10) * 100}
-                    className="h-2 bg-pink-100/50"
+                    className="h-2 bg-pink-100/50 mt-4"
                 />
             </CardHeader>
             <CardContent className="max-h-[600px] overflow-y-auto px-4 pb-4">
@@ -345,20 +366,7 @@ export function SelectedPhotos({
                                     index={index}
                                     preview={preview}
                                     caption={captions[index] || ''}
-                                    onRemove={() => {
-                                        const newFiles = [...selectedFiles];
-                                        const newPreviews = [...previews];
-                                        const newCaptions = [...captions];
-                                        const newMetadata = [...metadata];
-                                        newFiles.splice(index, 1);
-                                        newPreviews.splice(index, 1);
-                                        newCaptions.splice(index, 1);
-                                        newMetadata.splice(index, 1);
-                                        setSelectedFiles(newFiles);
-                                        setPreviews(newPreviews);
-                                        setCaptions(newCaptions);
-                                        setMetadata(newMetadata);
-                                    }}
+                                    onRemove={() => handleRemove(index)}
                                     onCaptionChange={(newCaption) => {
                                         const newCaptions = [...captions];
                                         newCaptions[index] = newCaption;

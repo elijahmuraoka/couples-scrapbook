@@ -1,180 +1,154 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useScrapbookStore } from '@/store/useScrapbookStore';
 import { ScrapbookDetails } from './scrapbook-details';
 import { PhotoUpload } from './photo-upload';
 import { SelectedPhotos } from './selected-photos';
-import { SubmitButton } from './submit-button';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
+import { PreviewButton } from './submit-button';
 import { MusicSelector } from './music-selector';
+import { Button } from '@/components/ui/button';
+import { Trash2, BookOpen, ArrowLeft } from 'lucide-react';
 
 export function ScrapbookForm() {
-    const [title, setTitle] = useState('');
-    const [note, setNote] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const [previews, setPreviews] = useState<string[]>([]);
-    const [uploadProgress, setUploadProgress] = useState<number>(0);
-    const [musicFile, setMusicFile] = useState<File | null>(null);
-    const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
-    const [captions, setCaptions] = useState<string[]>([]);
-    const [metadata, setMetadata] = useState<Array<{
-        location?: string;
-        takenAt?: Date;
-    }>>([]);
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+    const { draft, updateDraft, clearDraft } = useScrapbookStore();
+
+    const handleClear = () => {
+        if (
+            confirm(
+                'Are you sure you want to clear everything and start fresh?'
+            )
+        ) {
+            clearDraft();
+            toast.success('Everything cleared! Start fresh.');
+        }
+    };
 
     const handleSubmit = async () => {
         // Form validation
-        if (!title.trim()) {
-            toast.error('Please enter a title for your scrapbook', {
-                style: {
-                    backgroundColor: '#FEE2E2',
-                    border: '1px solid #FCA5A5',
-                    color: '#991B1B',
-                },
-                duration: 3000,
-            });
+        if (!draft.title.trim()) {
+            toast.error('Please enter a title for your scrapbook');
             return;
         }
 
-        if (selectedFiles.length === 0) {
-            toast.error('Please select at least one photo', {
-                style: {
-                    backgroundColor: '#FEE2E2',
-                    border: '1px solid #FCA5A5',
-                    color: '#991B1B',
-                },
-                duration: 3000,
-            });
+        if (draft.selectedFiles.length === 0) {
+            toast.error('Please select at least one photo');
             return;
         }
 
         setIsLoading(true);
         try {
-            // Create scrapbook
-            const response = await fetch('/api/scrapbooks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    title, 
-                    note,
-                    music_id: selectedSongId,
-                    is_published: false // Save as draft
-                }),
-            });
-
-            const scrapbook = await response.json();
-            if (!response.ok) throw new Error(scrapbook.error);
-
-            // Upload photos with captions
-            for (let i = 0; i < selectedFiles.length; i++) {
-                setUploadProgress(Math.round((i / selectedFiles.length) * 100));
-                const file = selectedFiles[i];
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${scrapbook.id}/${Math.random()}.${fileExt}`;
-
-                const { error: uploadError } = await supabase.storage
-                    .from('photos')
-                    .upload(fileName, file);
-
-                if (uploadError) throw uploadError;
-
-                const { data: { publicUrl } } = supabase.storage
-                    .from('photos')
-                    .getPublicUrl(fileName);
-
-                const { error: dbError } = await supabase
-                    .from('photos')
-                    .insert([{
-                        scrapbook_id: scrapbook.id,
-                        url: publicUrl,
-                        order: i,
-                        caption: captions[i]
-                    }]);
-
-                if (dbError) throw dbError;
-            }
-
-            // Redirect to preview instead of final page
-            router.push(`/scrapbook/preview/${scrapbook.code}`);
+            // Instead of creating in database, we'll redirect to preview
+            router.push(`/preview`);
         } catch (error) {
-            toast.error('Something went wrong. Please try again.', {
-                style: {
-                    backgroundColor: '#FEE2E2',
-                    border: '1px solid #FCA5A5',
-                    color: '#991B1B',
-                },
-                duration: 3000,
-            });
             console.error('Error:', error);
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setIsLoading(false);
-            setUploadProgress(0);
         }
     };
 
-    const handleMusicUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        
-        // Validate file type
-        if (!file.type.startsWith('audio/')) {
-            toast.error('Please upload an audio file');
-            return;
-        }
-        
-        // Validate file size (e.g., 10MB limit)
-        if (file.size > 10 * 1024 * 1024) {
-            toast.error('Audio file must be less than 10MB');
-            return;
-        }
-        
-        setMusicFile(file);
-    };
+    // Add beforeunload handler
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (draft.selectedFiles.length > 0) {
+                e.preventDefault();
+                e.returnValue = ''; // Required for Chrome
+                return ''; // Required for other browsers
+            }
+        };
 
-    const handlePhotoSelect = (files: FileList) => {
-        // ... existing file handling code ...
-        setCaptions(prev => [...prev, ...Array(files.length).fill('')]);
-    };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () =>
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [draft.selectedFiles.length]);
 
     return (
         <div className="space-y-6">
-            <ScrapbookDetails
-                title={title}
-                setTitle={setTitle}
-                note={note}
-                setNote={setNote}
-            />
-            <MusicSelector
-                selectedSongId={selectedSongId}
-                onSelect={setSelectedSongId}
-            />
-            <PhotoUpload
-                selectedFiles={selectedFiles}
-                setSelectedFiles={setSelectedFiles}
-                setPreviews={setPreviews}
-                setMetadata={setMetadata}
-                setCaptions={setCaptions}
-            />
-            {selectedFiles.length > 0 && (
-                <SelectedPhotos
-                    selectedFiles={selectedFiles}
-                    setSelectedFiles={setSelectedFiles}
-                    previews={previews}
-                    setPreviews={setPreviews}
-                    captions={captions}
-                    setCaptions={setCaptions}
-                    metadata={metadata}
-                    setMetadata={setMetadata}
+            {/* Top Navigation */}
+            <div className="flex justify-between items-center">
+                <Button
+                    variant="ghost"
+                    className="-ml-2 text-gray-600 hover:text-gray-900"
+                    onClick={() => router.push('/')}
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Home
+                </Button>
+            </div>
+
+            {/* Content Area */}
+            <div className="space-y-6">
+                <div className="flex items-center justify-between pb-6 border-b">
+                    <div className="flex items-center gap-4">
+                        <div className="p-2.5 bg-pink-50 rounded-xl">
+                            <BookOpen className="w-6 h-6 text-pink-500" />
+                        </div>
+                        <div>
+                            <h1 className="text-4xl font-serif italic text-gray-900">
+                                Create Your Scrapbook
+                            </h1>
+                            <p className="mt-1 text-sm text-gray-500">
+                                Add photos, write captions, and share your
+                                memories
+                            </p>
+                        </div>
+                    </div>
+                    <Button
+                        onClick={handleClear}
+                        variant="outline"
+                        size="sm"
+                        className="text-red-500 border-red-200 hover:bg-red-100/50 hover:text-red-600 hover:border-red-300 transition-colors"
+                    >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Clear All
+                    </Button>
+                </div>
+
+                <ScrapbookDetails
+                    title={draft.title}
+                    setTitle={(title) => updateDraft({ title })}
+                    note={draft.note || ''}
+                    setNote={(note) => updateDraft({ note })}
                 />
-            )}
-            <SubmitButton
-                onClick={handleSubmit}
-                isLoading={isLoading}
-            />
+                <MusicSelector
+                    selectedSongId={draft.selectedSongId}
+                    onSelect={(songId) =>
+                        updateDraft({ selectedSongId: songId })
+                    }
+                />
+                <PhotoUpload
+                    selectedFiles={draft.selectedFiles}
+                    previews={draft.previews}
+                    metadata={draft.metadata}
+                    captions={draft.captions}
+                    setSelectedFiles={(files) =>
+                        updateDraft({ selectedFiles: files })
+                    }
+                    setPreviews={(urls) => updateDraft({ previews: urls })}
+                    setMetadata={(meta) => updateDraft({ metadata: meta })}
+                    setCaptions={(caps) => updateDraft({ captions: caps })}
+                />
+                {draft.selectedFiles.length > 0 && (
+                    <SelectedPhotos
+                        selectedFiles={draft.selectedFiles}
+                        setSelectedFiles={(files) =>
+                            updateDraft({ selectedFiles: files })
+                        }
+                        previews={draft.previews}
+                        setPreviews={(urls) => updateDraft({ previews: urls })}
+                        captions={draft.captions}
+                        setCaptions={(caps) => updateDraft({ captions: caps })}
+                        metadata={draft.metadata}
+                        setMetadata={(meta) => updateDraft({ metadata: meta })}
+                    />
+                )}
+                <PreviewButton onClick={handleSubmit} isLoading={isLoading} />
+            </div>
         </div>
     );
-} 
+}

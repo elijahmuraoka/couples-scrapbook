@@ -15,14 +15,20 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 
 interface PhotoUploadProps {
     selectedFiles: File[];
-    setSelectedFiles: React.Dispatch<React.SetStateAction<File[]>>;
-    setPreviews: React.Dispatch<React.SetStateAction<string[]>>;
-    setMetadata: React.Dispatch<React.SetStateAction<any[]>>;
-    setCaptions: React.Dispatch<React.SetStateAction<string[]>>;
+    previews: string[];
+    metadata: Array<{ location?: string; takenAt?: Date }>;
+    captions: string[];
+    setSelectedFiles: (files: File[]) => void;
+    setPreviews: (urls: string[]) => void;
+    setMetadata: (meta: Array<{ location?: string; takenAt?: Date }>) => void;
+    setCaptions: (captions: string[]) => void;
 }
 
 export function PhotoUpload({
     selectedFiles,
+    previews,
+    metadata,
+    captions,
     setSelectedFiles,
     setPreviews,
     setMetadata,
@@ -32,66 +38,34 @@ export function PhotoUpload({
         const files = Array.from(e.target.files || []);
         const totalFiles = selectedFiles.length + files.length;
 
-        // Check total number of files
         if (totalFiles > 10) {
-            toast.error('You can only upload up to 10 photos', {
-                style: {
-                    backgroundColor: '#FEE2E2',
-                    border: '1px solid #FCA5A5',
-                    color: '#991B1B',
-                },
-                duration: 3000,
-            });
+            toast.error('You can only upload up to 10 photos');
             return;
         }
 
-        // Validate file sizes
-        const invalidFiles = files.filter((file) => file.size > MAX_FILE_SIZE);
-        if (invalidFiles.length > 0) {
-            toast.error(
-                `Some files exceed the 10MB limit: ${invalidFiles
-                    .map((f) => f.name)
-                    .join(', ')}`,
-                {
-                    style: {
-                        backgroundColor: '#FEE2E2',
-                        border: '1px solid #FCA5A5',
-                        color: '#991B1B',
-                    },
-                    duration: 3000,
-                }
-            );
-            return;
-        }
+        // Create object URLs for previews
+        const newPreviews = files.map((file) => URL.createObjectURL(file));
 
-        // Extract metadata and create previews
+        // Extract metadata and update state
         const photosWithMetadata = await Promise.all(
             files.map(async (file) => {
                 const metadata = await extractMetadata(file);
-                const preview = URL.createObjectURL(file);
-                return { file, preview, metadata };
+                return { file, metadata };
             })
         );
 
-        // Add new files and metadata
-        setSelectedFiles((prev: File[]) => [
-            ...prev,
+        setSelectedFiles([
+            ...selectedFiles,
             ...photosWithMetadata.map((p) => p.file),
         ]);
-        setPreviews((prev: string[]) => [
-            ...prev,
-            ...photosWithMetadata.map((p) => p.preview),
-        ]);
-        setMetadata((prev: any[]) => [
-            ...prev,
+        setPreviews([...previews, ...newPreviews]);
+        setMetadata([
+            ...metadata,
             ...photosWithMetadata.map((p) => p.metadata),
         ]);
-        setCaptions((prev: string[]) => [
-            ...prev,
-            ...Array(files.length).fill(''),
-        ]);
+        setCaptions([...captions, ...Array(files.length).fill('')]);
 
-        // Reset input value to allow selecting the same file again
+        // Reset input
         if (e.target) {
             e.target.value = '';
         }
@@ -138,10 +112,19 @@ export function PhotoUpload({
     return (
         <Card className="border-pink-100 shadow-md overflow-hidden">
             <CardHeader>
-                <CardTitle className="text-gray-800">Upload Photos</CardTitle>
-                <CardDescription className="flex flex-col items-center">
-                    <span>Add up to 10 of your favorite moments</span>
-                </CardDescription>
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-pink-50 rounded-lg">
+                        <ImagePlus className="w-5 h-5 text-pink-500" />
+                    </div>
+                    <div>
+                        <CardTitle className="text-xl text-gray-800">
+                            Upload Photos
+                        </CardTitle>
+                        <CardDescription>
+                            Add up to 10 of your favorite moments
+                        </CardDescription>
+                    </div>
+                </div>
             </CardHeader>
             <CardContent className="p-0">
                 <label

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Card,
     CardHeader,
@@ -8,69 +8,104 @@ import {
     CardDescription,
     CardContent,
 } from '@/components/ui/card';
-import { Play, Pause, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Play, Pause, Music2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { MUSIC_LIBRARY } from '@/lib/music-library';
 
 interface MusicSelectorProps {
     selectedSongId: string | null;
-    onSelect: (songId: string) => void;
+    onSelect: (songId: string | null) => void;
 }
 
 export function MusicSelector({
     selectedSongId,
     onSelect,
 }: MusicSelectorProps) {
-    const [playingId, setPlayingId] = useState<string | null>(null);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [playingSongId, setPlayingSongId] = useState<string | null>(null);
+    const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
-    const handlePlay = (songId: string, url: string) => {
-        if (playingId === songId) {
-            audioRef.current?.pause();
-            setPlayingId(null);
+    // Initialize audio on client side only
+    useEffect(() => {
+        setAudio(new Audio());
+    }, []);
+
+    const handlePlay = (songId: string) => {
+        if (!audio) return;
+
+        if (playingSongId === songId) {
+            audio.pause();
+            setPlayingSongId(null);
         } else {
-            if (audioRef.current) {
-                audioRef.current.pause();
+            if (playingSongId) {
+                audio.pause();
             }
-            audioRef.current = new Audio(url);
-            audioRef.current.play();
-            setPlayingId(songId);
+            audio.src = `/music/${songId}.mp3`;
+            audio.play();
+            setPlayingSongId(songId);
         }
     };
+
+    // Clean up audio on unmount
+    useEffect(() => {
+        return () => {
+            if (audio) {
+                audio.pause();
+                audio.src = '';
+            }
+        };
+    }, [audio]);
 
     return (
         <Card className="border-pink-100 shadow-md">
             <CardHeader>
-                <CardTitle className="text-gray-800">
-                    Choose Background Music
-                </CardTitle>
-                <CardDescription>
-                    Select a song to accompany your memories
-                </CardDescription>
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-pink-50 rounded-lg">
+                        <Music2 className="w-5 h-5 text-pink-500" />
+                    </div>
+                    <div>
+                        <CardTitle className="text-xl text-gray-800">
+                            Choose Background Music
+                        </CardTitle>
+                        <CardDescription>
+                            Select a song to accompany your memories
+                        </CardDescription>
+                    </div>
+                </div>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2">
                 {MUSIC_LIBRARY.map((song) => (
                     <div
                         key={song.id}
-                        className={`
-                            p-4 rounded-lg border transition-all flex items-center justify-between
-                            ${
-                                selectedSongId === song.id
-                                    ? 'border-pink-300 bg-pink-50'
-                                    : 'border-gray-100 hover:border-pink-200'
-                            }
-                        `}
+                        className={cn(
+                            'flex items-center justify-between p-3 rounded-lg transition-all',
+                            'hover:bg-pink-50/50 cursor-pointer',
+                            selectedSongId === song.id &&
+                                'bg-pink-50 ring-1 ring-pink-200',
+                            playingSongId === song.id && 'bg-pink-50/80'
+                        )}
+                        onClick={() => onSelect(song.id)}
                     >
                         <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => handlePlay(song.id, song.url)}
-                                className="p-2 hover:bg-pink-100 rounded-full transition-colors"
-                            >
-                                {playingId === song.id ? (
-                                    <Pause className="w-5 h-5 text-pink-600" />
-                                ) : (
-                                    <Play className="w-5 h-5 text-pink-600" />
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className={cn(
+                                    'h-8 w-8 rounded-full',
+                                    playingSongId === song.id &&
+                                        'text-pink-600 bg-white shadow-sm'
                                 )}
-                            </button>
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePlay(song.id);
+                                }}
+                            >
+                                {playingSongId === song.id ? (
+                                    <Pause className="h-4 w-4" />
+                                ) : (
+                                    <Play className="h-4 w-4 ml-0.5" />
+                                )}
+                            </Button>
                             <div>
                                 <div className="font-medium text-gray-700">
                                     {song.title}
@@ -80,21 +115,11 @@ export function MusicSelector({
                                 </div>
                             </div>
                         </div>
-                        <button
-                            onClick={() => onSelect(song.id)}
-                            className={`
-                                p-2 rounded-full transition-colors
-                                ${
-                                    selectedSongId === song.id
-                                        ? 'bg-pink-100'
-                                        : 'hover:bg-pink-50'
-                                }
-                            `}
-                        >
-                            {selectedSongId === song.id && (
-                                <Check className="w-5 h-5 text-pink-600" />
-                            )}
-                        </button>
+                        {selectedSongId === song.id && (
+                            <div className="text-sm font-medium text-pink-600">
+                                Selected
+                            </div>
+                        )}
                     </div>
                 ))}
             </CardContent>
