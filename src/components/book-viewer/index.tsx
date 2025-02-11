@@ -12,6 +12,7 @@ import {
 } from '@/types/scrapbook';
 import { cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface BookViewerProps {
     data: ScrapbookDraft | Scrapbook;
@@ -72,8 +73,9 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
         }
     }, [photos, router, pathname]);
 
+    // Return null instead of loading state
     if (!photos || photos.length === 0) {
-        throw new Error('No photos found rendering scrapbook');
+        return null;
     }
 
     const pages = [

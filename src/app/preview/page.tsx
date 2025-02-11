@@ -86,6 +86,10 @@ export default function PreviewPage() {
         }
     };
 
+    if (!draft.selectedFiles || draft.selectedFiles.length === 0) {
+        return null;
+    }
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-6">
             <div className="max-w-4xl mx-auto space-y-6">
