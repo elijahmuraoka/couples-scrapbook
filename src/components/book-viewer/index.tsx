@@ -95,12 +95,6 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 <div className="absolute top-[-2px] right-[-2px] w-12 h-12 border-t-2 border-r-2 border-[#E5C87D]" />
                 <div className="absolute bottom-[-2px] left-[-2px] w-12 h-12 border-b-2 border-l-2 border-[#E5C87D]" />
                 <div className="absolute bottom-[-2px] right-[-2px] w-12 h-12 border-b-2 border-r-2 border-[#E5C87D]" />
-
-                {/* Decorative corner flourishes */}
-                <div className="absolute top-[-8px] left-[-8px] w-16 h-16 bg-[url('/corner-flourish.png')] bg-contain bg-no-repeat opacity-60" />
-                <div className="absolute top-[-8px] right-[-8px] w-16 h-16 bg-[url('/corner-flourish.png')] bg-contain bg-no-repeat transform rotate-90 opacity-60" />
-                <div className="absolute bottom-[-8px] left-[-8px] w-16 h-16 bg-[url('/corner-flourish.png')] bg-contain bg-no-repeat transform -rotate-90 opacity-60" />
-                <div className="absolute bottom-[-8px] right-[-8px] w-16 h-16 bg-[url('/corner-flourish.png')] bg-contain bg-no-repeat transform rotate-180 opacity-60" />
             </div>
 
             {/* Content */}
