@@ -16,11 +16,11 @@ export default function PreviewPage() {
     const [autoPlayMusic, setAutoPlayMusic] = useState(true);
 
     useEffect(() => {
-        if (draft.selectedFiles.length === 0) {
+        if (!isPublishing && !draft.title && draft.selectedFiles.length === 0) {
             router.replace('/create');
             toast.error('Please select photos before previewing');
         }
-    }, [draft.selectedFiles.length, router]);
+    }, [draft.title, draft.selectedFiles.length, router, isPublishing]);
 
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -40,7 +40,6 @@ export default function PreviewPage() {
     const handlePublish = async () => {
         setIsPublishing(true);
         try {
-            // Convert blob URLs to base64
             const filePromises = draft.selectedFiles.map(
                 async (file, index) => {
                     const response = await fetch(draft.previews[index]);
@@ -56,7 +55,7 @@ export default function PreviewPage() {
             const base64Files = await Promise.all(filePromises);
             const publishData = {
                 ...draft,
-                previews: base64Files, // Send base64 strings instead of blob URLs
+                previews: base64Files,
             };
 
             const response = await fetch('/api/scrapbooks', {
@@ -67,14 +66,18 @@ export default function PreviewPage() {
             if (!response.ok) throw new Error('Failed to publish');
 
             const { code } = await response.json();
-            clearDraft();
-            router.push(`/scrapbook/${code}`);
+
+            // Disable the empty files check completely
+            setIsPublishing(true);
+
+            // Use router.replace instead of push to prevent back navigation
+            router.replace(`/scrapbook/${code}`);
             toast.success('Scrapbook published successfully!');
+            clearDraft();
         } catch (error) {
             console.error('Error publishing:', error);
             toast.error('Failed to publish scrapbook');
-        } finally {
-            setIsPublishing(false);
+            setIsPublishing(false); // Only reset on error
         }
     };
 

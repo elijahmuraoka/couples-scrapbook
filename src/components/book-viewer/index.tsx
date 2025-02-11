@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
 import HTMLFlipBook from 'react-pageflip';
@@ -11,7 +11,7 @@ import {
     isScrapbook,
 } from '@/types/scrapbook';
 import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface BookViewerProps {
     data: ScrapbookDraft | Scrapbook;
@@ -62,9 +62,18 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
         'horizontal'
     );
     const router = useRouter();
+    const pathname = usePathname();
 
-    if (!photos || ('length' in photos && photos.length === 0)) {
-        router.push('/');
+    // Only redirect if we're not in preview and have no photos
+    useEffect(() => {
+        const isPreviewPage = pathname === '/preview';
+        if (!isPreviewPage && (!photos || photos.length === 0)) {
+            router.push('/');
+        }
+    }, [photos, router]);
+
+    if (!photos || photos.length === 0) {
+        throw new Error('No photos found rendering scrapbook');
     }
 
     const pages = [
