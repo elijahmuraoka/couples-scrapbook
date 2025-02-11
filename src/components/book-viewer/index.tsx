@@ -77,24 +77,39 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
     }
 
     const pages = [
-        // Cover page
+        // Enhanced Front Cover
         <div
             key="cover"
             className="relative bg-[#1B2C4C] p-12 flex flex-col items-center justify-center text-white overflow-hidden"
         >
+            {/* Leather texture */}
             <div className="absolute inset-0 bg-[url('/leather.png')] opacity-20" />
+
+            {/* Gold frame */}
             <div className="absolute inset-8">
+                {/* Main border */}
                 <div className="absolute inset-0 border-[2px] border-[#E5C87D]/60" />
-                <div className="absolute top-[-2px] left-[-2px] w-8 h-8 border-t-2 border-l-2 border-[#E5C87D]" />
-                <div className="absolute top-[-2px] right-[-2px] w-8 h-8 border-t-2 border-r-2 border-[#E5C87D]" />
-                <div className="absolute bottom-[-2px] left-[-2px] w-8 h-8 border-b-2 border-l-2 border-[#E5C87D]" />
-                <div className="absolute bottom-[-2px] right-[-2px] w-8 h-8 border-b-2 border-r-2 border-[#E5C87D]" />
+
+                {/* Corner decorations */}
+                <div className="absolute top-[-2px] left-[-2px] w-12 h-12 border-t-2 border-l-2 border-[#E5C87D]" />
+                <div className="absolute top-[-2px] right-[-2px] w-12 h-12 border-t-2 border-r-2 border-[#E5C87D]" />
+                <div className="absolute bottom-[-2px] left-[-2px] w-12 h-12 border-b-2 border-l-2 border-[#E5C87D]" />
+                <div className="absolute bottom-[-2px] right-[-2px] w-12 h-12 border-b-2 border-r-2 border-[#E5C87D]" />
+
+                {/* Decorative corner flourishes */}
+                <div className="absolute top-[-8px] left-[-8px] w-16 h-16 bg-[url('/corner-flourish.png')] bg-contain bg-no-repeat opacity-60" />
+                <div className="absolute top-[-8px] right-[-8px] w-16 h-16 bg-[url('/corner-flourish.png')] bg-contain bg-no-repeat transform rotate-90 opacity-60" />
+                <div className="absolute bottom-[-8px] left-[-8px] w-16 h-16 bg-[url('/corner-flourish.png')] bg-contain bg-no-repeat transform -rotate-90 opacity-60" />
+                <div className="absolute bottom-[-8px] right-[-8px] w-16 h-16 bg-[url('/corner-flourish.png')] bg-contain bg-no-repeat transform rotate-180 opacity-60" />
             </div>
+
+            {/* Content */}
             <div className="relative z-10 text-center max-w-lg">
-                <Heart className="w-16 h-16 mb-8 text-[#E5C87D] drop-shadow-lg" />
-                <h1 className="text-5xl font-serif italic text-center mb-6 tracking-wide text-[#E5C87D]">
+                <Heart className="w-16 h-16 text-[#E5C87D] drop-shadow-lg" />
+                <h1 className="text-5xl font-serif italic text-center mb-6 tracking-wide text-[#E5C87D] drop-shadow-sm">
                     {title}
                 </h1>
+                <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-[#E5C87D]/60 to-transparent mx-auto my-4" />
                 <p className="font-handwriting text-xl text-[#E5C87D]/80 mt-8">
                     Open to view our story
                 </p>
@@ -221,17 +236,29 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
             </div>
         )),
 
-        // Closing page
+        // Enhanced Closing Cover
         <div
             key="closing"
             className="relative bg-[#1B2C4C] p-12 flex flex-col items-center justify-center text-white overflow-hidden"
         >
             <div className="absolute inset-0 bg-[url('/leather.png')] opacity-20" />
+
+            {/* Gold frame (same as front cover) */}
+            <div className="absolute inset-8">
+                <div className="absolute inset-0 border-[2px] border-[#E5C87D]/60" />
+                <div className="absolute top-[-2px] left-[-2px] w-12 h-12 border-t-2 border-l-2 border-[#E5C87D]" />
+                <div className="absolute top-[-2px] right-[-2px] w-12 h-12 border-t-2 border-r-2 border-[#E5C87D]" />
+                <div className="absolute bottom-[-2px] left-[-2px] w-12 h-12 border-b-2 border-l-2 border-[#E5C87D]" />
+                <div className="absolute bottom-[-2px] right-[-2px] w-12 h-12 border-b-2 border-r-2 border-[#E5C87D]" />
+            </div>
+
+            {/* Content */}
             <div className="relative z-10 text-center max-w-lg">
-                <Heart className="w-16 h-16 mb-8 text-[#E5C87D] drop-shadow-lg" />
+                <Heart className="w-16 h-16 text-[#E5C87D] drop-shadow-lg" />
                 <h2 className="font-serif text-3xl italic text-[#E5C87D] mb-4">
                     The End
                 </h2>
+                <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-[#E5C87D]/60 to-transparent mx-auto my-4" />
                 <p className="font-handwriting text-xl text-[#E5C87D]/80">
                     ...but our story continues
                 </p>
