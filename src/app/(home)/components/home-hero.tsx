@@ -7,11 +7,9 @@ export function HomeHero() {
                 <Heart className="w-12 h-12 text-pink-500 animate-pulse" />
             </div>
             <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-pink-500 to-rose-500 text-transparent bg-clip-text">
-                Digital Scrapbook
+                A Gift From Your Broke But Loving Partner
             </h1>
-            <p className="text-gray-500">
-                Capture your love story, one memory at a time
-            </p>
+            <p className="text-gray-500">I have no money, but I love you.</p>
         </div>
     );
-} 
+}
