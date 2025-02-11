@@ -85,8 +85,8 @@ export function ScrapbookForm() {
             <div className="space-y-6">
                 <div className="flex items-center justify-between pb-6 border-b">
                     <div className="flex items-center gap-4">
-                        <div className="p-2.5 bg-pink-50 rounded-xl">
-                            <BookOpen className="w-6 h-6 text-pink-500" />
+                        <div className="p-2 bg-pink-50 rounded-xl">
+                            <BookOpen className="w-8 h-8 text-pink-500" />
                         </div>
                         <div>
                             <h1 className="text-4xl font-serif italic text-gray-900">

@@ -40,18 +40,28 @@ export default function PreviewPage() {
     const handlePublish = async () => {
         setIsPublishing(true);
         try {
+            // Convert blob URLs to base64
+            const filePromises = draft.selectedFiles.map(
+                async (file, index) => {
+                    const response = await fetch(draft.previews[index]);
+                    const blob = await response.blob();
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                }
+            );
+
+            const base64Files = await Promise.all(filePromises);
+            const publishData = {
+                ...draft,
+                previews: base64Files, // Send base64 strings instead of blob URLs
+            };
+
             const response = await fetch('/api/scrapbooks', {
                 method: 'POST',
-                body: JSON.stringify({
-                    title: draft.title,
-                    note: draft.note,
-                    photos: draft.selectedFiles.map((file, index) => ({
-                        file,
-                        caption: draft.captions[index],
-                        metadata: draft.metadata[index],
-                    })),
-                    songId: draft.selectedSongId,
-                }),
+                body: JSON.stringify(publishData),
             });
 
             if (!response.ok) throw new Error('Failed to publish');
@@ -85,8 +95,8 @@ export default function PreviewPage() {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between pb-6 border-b">
                         <div className="flex items-center gap-4">
-                            <div className="p-2.5 bg-pink-50 rounded-xl">
-                                <Eye className="w-6 h-6 text-pink-500" />
+                            <div className="p-2 bg-pink-50 rounded-xl">
+                                <Eye className="w-8 h-8 text-pink-500" />
                             </div>
                             <div>
                                 <h1 className="text-4xl font-serif italic text-gray-900">
@@ -117,7 +127,7 @@ export default function PreviewPage() {
                         </div>
                     </div>
 
-                    <BookViewer draft={draft} />
+                    <BookViewer data={draft} />
                 </div>
             </div>
         </div>

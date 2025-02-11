@@ -1,32 +1,71 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
 import HTMLFlipBook from 'react-pageflip';
-import { ScrapbookDraft } from '@/types/scrapbook';
+import {
+    ScrapbookDraft,
+    Scrapbook,
+    Photo,
+    isScrapbook,
+} from '@/types/scrapbook';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 interface BookViewerProps {
-    draft: ScrapbookDraft;
+    data: ScrapbookDraft | Scrapbook;
     showNavigation?: boolean;
 }
 
-export function BookViewer({ draft, showNavigation = true }: BookViewerProps) {
-    const {
-        title,
-        note,
-        previews: photos,
-        captions,
-        metadata, // TODO: add metadata information to the book
-        selectedSongId,
-    } = draft;
+interface NormalizedBookData {
+    title: string;
+    note: string | null;
+    photos: Omit<Photo, 'id' | 'scrapbook_id' | 'created_at'>[];
+}
+
+// Helper to normalize data structure
+function normalizeBookData(
+    data: ScrapbookDraft | Scrapbook
+): NormalizedBookData {
+    if (isScrapbook(data)) {
+        return {
+            title: data.title,
+            note: data.note || null,
+            photos: data.photos.map((photo) => ({
+                url: photo.url,
+                caption: photo.caption,
+                location: photo.location,
+                taken_at: photo.taken_at,
+                order: photo.order,
+            })),
+        };
+    } else {
+        return {
+            title: data.title,
+            note: data.note || null,
+            photos: data.previews.map((url, i) => ({
+                url,
+                caption: data.captions[i],
+                location: data.metadata[i]?.location,
+                taken_at: data.metadata[i]?.takenAt,
+                order: i,
+            })),
+        };
+    }
+}
+
+export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
+    const { title, note, photos } = normalizeBookData(data);
     const [currentPage, setCurrentPage] = useState(0);
     const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>(
         'horizontal'
     );
+    const router = useRouter();
 
-    console.log('Draft:', draft);
+    if (!photos || ('length' in photos && photos.length === 0)) {
+        router.push('/');
+    }
 
     const pages = [
         // Cover page
@@ -103,8 +142,8 @@ export function BookViewer({ draft, showNavigation = true }: BookViewerProps) {
                         {/* Photo container without any overlay effects */}
                         <div className="relative h-full">
                             <Image
-                                src={photo}
-                                alt={captions[index] || `Photo ${index + 1}`}
+                                src={photo.url}
+                                alt={photo.caption || `Photo ${index + 1}`}
                                 width={600}
                                 height={800}
                                 className="w-full h-full object-contain"
@@ -121,7 +160,7 @@ export function BookViewer({ draft, showNavigation = true }: BookViewerProps) {
                     </div>
 
                     {/* Caption with decorative elements */}
-                    {captions[index] && (
+                    {photo.caption && (
                         <div
                             className={cn(
                                 'transition-all duration-300',
@@ -141,15 +180,15 @@ export function BookViewer({ draft, showNavigation = true }: BookViewerProps) {
                             >
                                 <div className="relative max-w-lg mx-auto">
                                     <p className="font-handwriting text-xl leading-relaxed text-gray-600 text-center">
-                                        {captions[index]}
+                                        {photo.caption}
                                     </p>
 
-                                    {metadata[index]?.takenAt && (
+                                    {photo.taken_at && (
                                         <div className="mt-2 mb-1 text-center relative">
                                             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-pink-200/50 to-transparent" />
                                             <span className="font-handwriting text-sm text-gray-400 relative top-2">
                                                 {new Date(
-                                                    metadata[index].takenAt!
+                                                    photo.taken_at!
                                                 ).toLocaleDateString('en-US', {
                                                     month: 'long',
                                                     day: 'numeric',
