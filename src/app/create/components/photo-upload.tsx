@@ -126,28 +126,26 @@ export function PhotoUpload({
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="p-8 pt-0">
                 <label
                     htmlFor="file-upload"
-                    className="group relative block cursor-pointer"
+                    className="group relative block cursor-pointer transition-all duration-200 bg-gradient-to-b from-pink-50/50 hover:from-pink-100/50"
                 >
-                    <div className="p-8 transition-all duration-200 bg-gradient-to-b from-pink-50/50 hover:from-pink-100/50">
-                        <div className="border-2 border-dashed border-pink-200 rounded-lg p-8 transition-colors group-hover:border-pink-400">
-                            <div className="text-center">
-                                <div className="mx-auto h-16 w-16 text-pink-400 bg-white rounded-full flex items-center justify-center shadow-sm">
-                                    <ImagePlus className="w-8 h-8" />
-                                </div>
-                                <div className="mt-4 space-y-2">
-                                    <p className="text-sm font-medium text-pink-600">
-                                        Click to upload photos
-                                    </p>
-                                    <p className="text-xs text-gray-500">
-                                        or drag and drop your files here
-                                    </p>
-                                    <p className="text-xs text-gray-400">
-                                        PNG, JPG, GIF up to 10MB each
-                                    </p>
-                                </div>
+                    <div className="border-2 border-dashed border-pink-200 rounded-lg p-8 transition-colors group-hover:border-pink-400">
+                        <div className="text-center">
+                            <div className="mx-auto h-16 w-16 text-pink-400 bg-white rounded-full flex items-center justify-center shadow-sm">
+                                <ImagePlus className="w-8 h-8" />
+                            </div>
+                            <div className="mt-4 space-y-2">
+                                <p className="text-sm font-medium text-pink-600">
+                                    Click to upload photos
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    or drag and drop your files here
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                    PNG, JPG, GIF up to 10MB each
+                                </p>
                             </div>
                         </div>
                     </div>
