@@ -23,7 +23,7 @@ export function ScrapbookAccess() {
             const { data, error } = await supabase
                 .from('scrapbooks')
                 .select('code')
-                .eq('code', password.toUpperCase())
+                .eq('code', password)
                 .single();
 
             if (error || !data) {
@@ -48,7 +48,7 @@ export function ScrapbookAccess() {
         <Card className="border-pink-100 shadow-lg shadow-pink-100/50">
             <CardHeader>
                 <CardTitle className="text-center text-gray-800 text-lg font-medium">
-                    Enter Your Love Story
+                    Enter a password or make a new scrapbook
                 </CardTitle>
             </CardHeader>
             <CardContent>
@@ -64,7 +64,7 @@ export function ScrapbookAccess() {
                         <Button
                             type="submit"
                             className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
-                            disabled={isChecking}
+                            disabled={isChecking || !password.trim()}
                         >
                             {isChecking ? 'Checking...' : 'View Scrapbook'}
                         </Button>
@@ -91,4 +91,4 @@ export function ScrapbookAccess() {
             </CardContent>
         </Card>
     );
-} 
+}

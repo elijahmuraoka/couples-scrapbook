@@ -32,8 +32,9 @@ export default async function ScrapbookPage({
     const { code } = await params;
     const { success, scrapbook } = await fetchScrapbook(code);
 
-    if (!success || !scrapbook)
-        return <div>Error: Failed to fetch scrapbook</div>;
+    if (!success || !scrapbook) {
+        throw new Error('Failed to fetch scrapbook');
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-6 w-full">
