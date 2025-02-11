@@ -269,7 +269,6 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
     return (
         <div>
             <div className="aspect-[3/2] relative bg-white rounded-lg shadow-xl overflow-hidden min-h-[600px]">
-                {/* @ts-ignore - HTMLFlipBook types are not perfect */}
                 <HTMLFlipBook
                     width={600}
                     height={800}

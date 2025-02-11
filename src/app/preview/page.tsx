@@ -1,5 +1,8 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 import { useState, useEffect } from 'react';
 import { useScrapbookStore } from '@/store/useScrapbookStore';
 import { Button } from '@/components/ui/button';
@@ -15,7 +18,10 @@ export default function PreviewPage() {
     const [isPublishing, setIsPublishing] = useState(false);
 
     useEffect(() => {
-        if (!isPublishing && !draft.title && draft.selectedFiles.length === 0) {
+        if (
+            !isPublishing &&
+            (!draft.title || draft.selectedFiles.length === 0)
+        ) {
             router.replace('/create');
             toast.error('Please select photos before previewing');
         }
