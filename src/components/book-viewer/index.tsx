@@ -12,7 +12,6 @@ import {
 } from '@/types/scrapbook';
 import { cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 
 interface BookViewerProps {
     data: ScrapbookDraft | Scrapbook;

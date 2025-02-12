@@ -93,6 +93,7 @@ export default function PreviewPage() {
     const handlePublish = async () => {
         setIsPublishing(true);
         try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { previews, selectedFiles, ...publishData } = draft;
 
             // Start both operations
@@ -116,7 +117,7 @@ export default function PreviewPage() {
                 await fetch(`/api/scrapbooks?code=${code}`, {
                     method: 'DELETE',
                 });
-                throw new Error('Failed to upload photos');
+                throw new Error('Failed to upload photos: ' + uploadError);
             }
 
             // If we get here, both operations succeeded
