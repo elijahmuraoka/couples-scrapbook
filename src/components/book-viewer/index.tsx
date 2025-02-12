@@ -101,7 +101,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
             {/* Content */}
             <div className="relative z-10 text-center max-w-lg">
                 <Heart className="md:w-16 md:h-16 w-8 h-8 text-[#E5C87D] drop-shadow-lg" />
-                <h1 className="lg:text-5xl md:text-4xl text-2xl font-serif italic text-center m-12 tracking-wide text-[#E5C87D] drop-shadow-sm">
+                <h1 className="lg:text-5xl md:text-4xl text-2xl font-serif italic text-center m-12 tracking-wide text-[#E5C87D] drop-shadow-sm whitespace-pre-wrap">
                     {title}
                 </h1>
                 <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-[#E5C87D]/60 to-transparent mx-auto my-4" />
@@ -121,7 +121,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 <div className="max-w-md w-full space-y-6 relative">
                     <div className="relative">
                         <div className="absolute md:-top-4 -top-2 left-1/2 -translate-x-1/2 w-32 md:h-8 h-6 bg-washi-tape rotate-2" />
-                        <p className="font-handwriting md:text-xl text-sm leading-relaxed text-gray-600 p-8 bg-white/80 shadow-sm">
+                        <p className="font-handwriting md:text-xl text-sm leading-relaxed text-gray-600 p-8 bg-white/80 shadow-sm whitespace-pre-wrap">
                             {note}
                         </p>
                     </div>
@@ -198,7 +198,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                                 }}
                             >
                                 <div className="relative max-w-lg mx-auto">
-                                    <p className="font-handwriting md:text-xl text-sm leading-relaxed text-gray-600 text-center">
+                                    <p className="font-handwriting md:text-xl text-sm leading-relaxed text-gray-600 text-center whitespace-pre-wrap">
                                         {photo.caption}
                                     </p>
 
