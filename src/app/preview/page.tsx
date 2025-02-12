@@ -11,6 +11,53 @@ import { BookViewer } from '@/components/book-viewer';
 import { toast } from 'sonner';
 import { ArrowLeft, Eye } from 'lucide-react';
 import { MusicPlayer } from '@/components/music-player';
+import { ScrapbookDraft } from '@/types/scrapbook';
+import { supabase } from '@/lib/supabase/client';
+
+async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
+    const photoPromises = draft.previews.map(async (blobUrl, index) => {
+        // Convert blob URL to base64
+        const response = await fetch(blobUrl);
+        const blob = await response.blob();
+        const base64Data = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result as string;
+                // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
+                const base64 = base64String.split(',')[1];
+                resolve(base64);
+            };
+            reader.readAsDataURL(blob);
+        });
+
+        const fileData = Buffer.from(base64Data, 'base64');
+        const fileName = `${scrapbookId}/${Date.now()}-${index}.jpg`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('photos')
+            .upload(fileName, fileData, {
+                contentType: 'image/jpeg',
+                cacheControl: '3600',
+            });
+
+        if (uploadError) throw uploadError;
+
+        const {
+            data: { publicUrl },
+        } = supabase.storage.from('photos').getPublicUrl(fileName);
+
+        return supabase.from('photos').insert({
+            scrapbook_id: scrapbookId,
+            url: publicUrl,
+            order: index,
+            caption: draft.captions[index],
+            taken_at: draft.metadata[index]?.takenAt,
+            location: draft.metadata[index]?.location,
+        });
+    });
+
+    await Promise.all(photoPromises);
+}
 
 export default function PreviewPage() {
     const router = useRouter();
@@ -45,44 +92,41 @@ export default function PreviewPage() {
     const handlePublish = async () => {
         setIsPublishing(true);
         try {
-            const filePromises = draft.selectedFiles.map(
-                async (file, index) => {
-                    const response = await fetch(draft.previews[index]);
-                    const blob = await response.blob();
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
-                    });
-                }
-            );
+            const { previews, selectedFiles, ...publishData } = draft;
 
-            const base64Files = await Promise.all(filePromises);
-            const publishData = {
-                ...draft,
-                previews: base64Files,
-            };
-
-            const response = await fetch('/api/scrapbooks', {
+            // Start both operations
+            const scrapbookPromise = fetch('/api/scrapbooks', {
                 method: 'POST',
                 body: JSON.stringify(publishData),
             });
 
-            if (!response.ok) throw new Error('Failed to publish');
+            // Wait for scrapbook creation first
+            const response = await scrapbookPromise;
+            if (!response.ok)
+                throw new Error('Failed to create scrapbook in database');
 
-            const { code } = await response.json();
+            const { scrapbookId, code } = await response.json();
 
-            // Disable the empty files check completely
-            setIsPublishing(true);
+            try {
+                // Try to upload photos
+                await uploadPhotos(scrapbookId, draft);
+            } catch (uploadError) {
+                // If photo upload fails, delete the scrapbook
+                await fetch(`/api/scrapbooks?code=${code}`, {
+                    method: 'DELETE',
+                });
+                throw new Error('Failed to upload photos');
+            }
 
-            // Use router.replace instead of push to prevent back navigation
+            // If we get here, both operations succeeded
             router.replace(`/scrapbook/${code}`);
+            await new Promise((resolve) => setTimeout(resolve, 100));
             toast.success('Scrapbook published successfully!');
-            clearDraft();
+            setTimeout(() => clearDraft(), 0);
         } catch (error) {
             console.error('Error publishing:', error);
             toast.error('Failed to publish scrapbook');
-            setIsPublishing(false); // Only reset on error
+            setIsPublishing(false);
         }
     };
 
