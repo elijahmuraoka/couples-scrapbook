@@ -13,6 +13,7 @@ import { ArrowLeft, Eye } from 'lucide-react';
 import { MusicPlayer } from '@/components/music-player';
 import { ScrapbookDraft } from '@/types/scrapbook';
 import { supabase } from '@/lib/supabase/client';
+import confetti from 'canvas-confetti';
 
 async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
     const photoPromises = draft.previews.map(async (blobUrl, index) => {
@@ -121,6 +122,15 @@ export default function PreviewPage() {
             // If we get here, both operations succeeded
             router.replace(`/scrapbook/${code}`);
             await new Promise((resolve) => setTimeout(resolve, 100));
+
+            // Fire confetti!
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#ec4899', '#f43f5e', '#fb7185'], // pink shades
+            });
+
             toast.success('Scrapbook published successfully!');
             setTimeout(() => clearDraft(), 0);
         } catch (error) {
