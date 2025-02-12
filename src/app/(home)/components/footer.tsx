@@ -19,27 +19,27 @@ export function Footer() {
                             target="_blank"
                             className="text-gray-600 hover:text-pink-500 transition-colors"
                         >
-                            <LinkedinIcon className="w-5 h-5" />
+                            <LinkedinIcon className="w-6 h-6" />
                         </Link>
                         <Link
                             href="https://instagram.com/elijah.muraoka"
                             target="_blank"
                             className="text-gray-600 hover:text-pink-500 transition-colors"
                         >
-                            <InstagramIcon className="w-5 h-5" />
+                            <InstagramIcon className="w-6 h-6" />
                         </Link>
                         <Link
                             href="mailto:elijahmuraoka.services@gmail.com"
                             className="text-gray-600 hover:text-pink-500 transition-colors"
                         >
-                            <Mail className="w-5 h-5" />
+                            <Mail className="w-6 h-6" />
                         </Link>
                         <Link
                             href="https://twitter.com/elijah_muraoka_"
                             target="_blank"
                             className="text-gray-600 hover:text-pink-500 transition-colors"
                         >
-                            <TwitterIcon className="w-5 h-5" />
+                            <TwitterIcon className="w-6 h-6" />
                         </Link>
                     </div>
 
@@ -50,7 +50,7 @@ export function Footer() {
                             target="_blank"
                             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-rose-500/10 text-pink-600 hover:from-pink-500/20 hover:to-rose-500/20 transition-colors hover:cursor-pointer"
                         >
-                            <Heart className="w-4 h-4" />
+                            <Heart className="w-6 h-6 md:w-4 md:h-4" />
                             <span className="text-sm">
                                 Please support me so I can buy my girlfriend a
                                 real gift
