@@ -83,7 +83,7 @@ export function ScrapbookForm() {
 
             {/* Content Area */}
             <div className="space-y-6">
-                <div className="flex items-center justify-between pb-6 border-b">
+                <div className="flex flex-col md:flex-row gap-4 items-center justify-between pb-6 border-b">
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-pink-50 rounded-xl">
                             <BookOpen className="w-8 h-8 text-pink-500" />
@@ -102,7 +102,7 @@ export function ScrapbookForm() {
                         onClick={handleClear}
                         variant="outline"
                         size="sm"
-                        className="text-red-500 border-red-200 hover:bg-red-100/50 hover:text-red-600 hover:border-red-300 transition-colors"
+                        className="w-full md:w-auto text-red-500 border-red-200 hover:bg-red-100/50 hover:text-red-600 hover:border-red-300 transition-colors max-w-[400px]"
                     >
                         <Trash2 className="w-4 h-4 mr-2" />
                         Clear All

@@ -60,7 +60,7 @@ export function ScrapbookDetails({
                         <Label htmlFor="title" className="text-gray-600">
                             Title
                         </Label>
-                        <span className="text-sm text-gray-400">
+                        <span className="text-xs sm:text-sm text-gray-400">
                             {title.length}/{MAX_TITLE_LENGTH}
                         </span>
                     </div>
@@ -69,7 +69,7 @@ export function ScrapbookDetails({
                         value={title}
                         onChange={handleTitleChange}
                         placeholder="Enter a title for your scrapbook"
-                        className="w-full border-pink-200 focus-visible:ring-pink-500"
+                        className="w-full border-pink-200 focus-visible:ring-pink-500 text-xs sm:text-sm"
                         maxLength={MAX_TITLE_LENGTH}
                     />
                 </div>
@@ -86,10 +86,10 @@ export function ScrapbookDetails({
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                         placeholder="Write a note to accompany your photos..."
-                        className="min-h-[150px] resize-none"
+                        className="min-h-[150px] resize-none text-xs sm:text-sm"
                         maxLength={maxNoteLength}
                     />
-                    <div className="text-sm text-gray-500 text-right">
+                    <div className="text-xs sm:text-sm text-gray-500 text-right">
                         {noteCharCount}/{maxNoteLength} characters
                     </div>
                 </div>
