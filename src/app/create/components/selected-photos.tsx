@@ -100,7 +100,7 @@ function SortablePhotoItem({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className={`flex gap-4 bg-white rounded-lg shadow-sm p-4 
+                className={`flex flex-col lg:flex-row gap-4 bg-white rounded-lg shadow-sm p-4 
                     ${
                         isDragging
                             ? 'shadow-xl ring-2 ring-pink-200'
@@ -108,25 +108,37 @@ function SortablePhotoItem({
                     }
                     transition-shadow duration-200`}
             >
-                {/* Drag Handle & Number */}
-                <div className="flex items-center gap-2">
-                    <div
-                        {...attributes}
-                        {...listeners}
-                        className="cursor-grab active:cursor-grabbing hover:text-pink-500 transition-colors"
-                    >
-                        <GripVertical className="w-5 h-5" />
+                {/* Top Bar with Drag Handle & Trash */}
+                <div className="flex items-center justify-between w-full lg:w-auto gap-2">
+                    <div className="flex items-center gap-2">
+                        <div
+                            {...attributes}
+                            {...listeners}
+                            className="cursor-grab active:cursor-grabbing hover:text-pink-500 transition-colors"
+                        >
+                            <GripVertical className="w-5 h-5" />
+                        </div>
+                        <motion.span
+                            layout
+                            className="text-sm font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded-md"
+                        >
+                            {index + 1}
+                        </motion.span>
                     </div>
-                    <motion.span
-                        layout
-                        className="text-sm font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded-md"
+
+                    {/* Trash Button - Visible on mobile, hidden on lg */}
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={onRemove}
+                        className="lg:hidden text-gray-400 hover:text-red-500 p-1.5 rounded-full hover:bg-red-50/80 transition-colors"
                     >
-                        {index + 1}
-                    </motion.span>
+                        <Trash2 className="w-4 h-4" />
+                    </motion.button>
                 </div>
 
-                {/* Photo Preview with hover effect */}
-                <div className="relative w-48 h-32 rounded-md overflow-hidden flex-shrink-0 group">
+                {/* Rest of content */}
+                <div className="relative w-full lg:w-48 h-32 rounded-md overflow-hidden flex-shrink-0 group">
                     <Image
                         src={preview}
                         alt={`Preview ${index + 1}`}
@@ -174,27 +186,26 @@ function SortablePhotoItem({
                     </div>
                 </div>
 
-                {/* Caption Input */}
                 <div className="flex-grow space-y-1">
                     <Textarea
                         id={`caption-${id}`}
                         value={caption}
                         onChange={(e) => onCaptionChange(e.target.value)}
                         placeholder="Add a caption to this photo..."
-                        className="w-full resize-none h-24 transition-colors focus:border-pink-300"
+                        className="w-full resize-none h-24 text-xs sm:text-sm transition-colors focus:border-pink-300"
                         maxLength={maxCaptionLength}
                     />
-                    <div className="text-sm text-gray-500 text-right">
+                    <div className="sm:text-sm text-xs text-gray-500 text-right">
                         {caption.length}/{maxCaptionLength} characters
                     </div>
                 </div>
 
-                {/* Remove Button with better hover effect */}
+                {/* Trash Button - Hidden on mobile, visible on lg */}
                 <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={onRemove}
-                    className="self-start text-gray-400 hover:text-red-500 p-1.5 rounded-full hover:bg-red-50/80 transition-colors"
+                    className="hidden lg:block self-start text-gray-400 hover:text-red-500 p-1.5 rounded-full hover:bg-red-50/80 transition-colors"
                 >
                     <Trash2 className="w-4 h-4" />
                 </motion.button>
