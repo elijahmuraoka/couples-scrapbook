@@ -100,12 +100,12 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
 
             {/* Content */}
             <div className="relative z-10 text-center max-w-lg">
-                <Heart className="w-16 h-16 text-[#E5C87D] drop-shadow-lg" />
-                <h1 className="text-5xl font-serif italic text-center m-12 tracking-wide text-[#E5C87D] drop-shadow-sm">
+                <Heart className="md:w-16 md:h-16 w-8 h-8 text-[#E5C87D] drop-shadow-lg" />
+                <h1 className="lg:text-5xl md:text-4xl text-2xl font-serif italic text-center m-12 tracking-wide text-[#E5C87D] drop-shadow-sm">
                     {title}
                 </h1>
                 <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-[#E5C87D]/60 to-transparent mx-auto my-4" />
-                <p className="font-handwriting text-xl text-[#E5C87D]/80 mt-8">
+                <p className="font-handwriting md:text-xl text-sm [#E5C87D]/80 md:mt-8 mt-4">
                     Open to view our story
                 </p>
             </div>
@@ -120,13 +120,13 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 <div className="absolute inset-0 bg-[url('/handmade-paper.png')] opacity-20" />
                 <div className="max-w-md w-full space-y-6 relative">
                     <div className="relative">
-                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-32 h-8 bg-washi-tape rotate-2" />
-                        <p className="font-handwriting text-xl leading-relaxed text-gray-600 p-8 bg-white/80 shadow-sm">
+                        <div className="absolute md:-top-4 -top-2 left-1/2 -translate-x-1/2 w-32 md:h-8 h-6 bg-washi-tape rotate-2" />
+                        <p className="font-handwriting md:text-xl text-sm leading-relaxed text-gray-600 p-8 bg-white/80 shadow-sm">
                             {note}
                         </p>
                     </div>
                     <div className="flex justify-center">
-                        <Heart className="w-8 h-8 text-pink-300 opacity-50" />
+                        <Heart className="md:w-8 md:h-8 w-6 h-6 text-pink-300 opacity-50" />
                     </div>
                 </div>
             </div>
@@ -198,7 +198,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                                 }}
                             >
                                 <div className="relative max-w-lg mx-auto">
-                                    <p className="font-handwriting text-xl leading-relaxed text-gray-600 text-center">
+                                    <p className="font-handwriting md:text-xl text-sm leading-relaxed text-gray-600 text-center">
                                         {photo.caption}
                                     </p>
 
@@ -219,9 +219,9 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
 
                                     {/* Enhanced decorative hearts */}
                                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-3">
-                                        <Heart className="w-4 h-4 text-pink-400/80 drop-shadow-sm rotate-[-15deg] hover:scale-110 transition-transform" />
-                                        <Heart className="w-4 h-4 text-pink-400/80 drop-shadow-sm hover:scale-110 transition-transform" />
-                                        <Heart className="w-4 h-4 text-pink-400/80 drop-shadow-sm rotate-[15deg] hover:scale-110 transition-transform" />
+                                        <Heart className="md:w-4 md:h-4 w-3 h-3 text-pink-400/80 drop-shadow-sm rotate-[-15deg] hover:scale-110 transition-transform" />
+                                        <Heart className="md:w-4 md:h-4 w-3 h-3 text-pink-400/80 drop-shadow-sm hover:scale-110 transition-transform" />
+                                        <Heart className="md:w-4 md:h-4 w-3 h-3 text-pink-400/80 drop-shadow-sm rotate-[15deg] hover:scale-110 transition-transform" />
                                     </div>
                                 </div>
                             </div>
@@ -249,12 +249,12 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
 
             {/* Content */}
             <div className="relative z-10 text-center max-w-lg">
-                <Heart className="w-16 h-16 text-[#E5C87D] drop-shadow-lg" />
-                <h2 className="font-serif text-3xl italic text-[#E5C87D] mb-4">
+                <Heart className="md:w-16 md:h-16 w-8 h-8 text-[#E5C87D] drop-shadow-lg" />
+                <h2 className="font-serif md:text-3xl text-xl italic text-[#E5C87D] mb-4">
                     The End
                 </h2>
                 <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-[#E5C87D]/60 to-transparent mx-auto my-4" />
-                <p className="font-handwriting text-xl text-[#E5C87D]/80">
+                <p className="font-handwriting md:text-xl text-sm text-[#E5C87D]/80">
                     ...but our story continues
                 </p>
             </div>
@@ -263,35 +263,36 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
 
     return (
         <div>
-            <div className="aspect-[3/2] relative bg-white rounded-lg shadow-xl overflow-hidden min-h-[600px]">
+            <div className="md:aspect-[3/2] relative bg-white rounded-lg shadow-xl overflow-hidden min-h-[300px] md:min-h-[600px]">
                 <HTMLFlipBook
                     width={600}
                     height={800}
                     size="stretch"
-                    minWidth={300}
+                    minWidth={280}
                     maxWidth={1000}
-                    minHeight={400}
+                    minHeight={300}
                     maxHeight={1000}
                     showCover={true}
                     onFlip={(e) => setCurrentPage(e.data)}
+                    startZIndex={0}
+                    maxShadowOpacity={0.5}
+                    showPageCorners={true}
+                    disableFlipByClick={false}
                     className="mx-auto"
                     style={{
                         position: 'relative',
-                        touchAction: 'none', // Prevent touch scrolling issues
+                        touchAction: 'none',
                     }}
                     startPage={0}
                     drawShadow={true}
                     flippingTime={1000}
                     usePortrait={true}
-                    startZIndex={0}
                     autoSize={true}
-                    maxShadowOpacity={0.5}
-                    showPageCorners={true}
-                    disableFlipByClick={false}
-                    useMouseEvents={true}
-                    swipeDistance={0}
-                    clickEventForward={true}
                     mobileScrollSupport={true}
+                    swipeDistance={30}
+                    clickEventForward={true}
+                    useMouseEvents={true}
+                    renderOnlyPageLengthChange={true}
                 >
                     {pages}
                 </HTMLFlipBook>

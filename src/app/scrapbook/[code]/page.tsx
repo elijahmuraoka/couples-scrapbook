@@ -37,7 +37,7 @@ export default async function ScrapbookPage({
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-6 w-full">
+        <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-8 md:p-12 w-full">
             <div className="max-w-5xl w-full mx-auto">
                 {/* Back to Home Button */}
                 <Link href="/">

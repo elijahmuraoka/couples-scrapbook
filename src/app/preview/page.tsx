@@ -146,7 +146,7 @@ export default function PreviewPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-6">
+        <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-8 md:p-12">
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Top Navigation */}
                 <Button
@@ -159,8 +159,8 @@ export default function PreviewPage() {
                 </Button>
 
                 {/* Content Area */}
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between pb-6 border-b">
+                <div className="space-y-6 w-full">
+                    <div className="flex flex-col md:flex-row gap-4 items-center md:justify-between pb-6 border-b w-full">
                         <div className="flex items-center gap-4">
                             <div className="p-2 bg-pink-50 rounded-xl">
                                 <Eye className="w-8 h-8 text-pink-500" />
@@ -174,7 +174,7 @@ export default function PreviewPage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 w-full md:w-auto max-w-[400px]">
                             {draft.selectedSongId && (
                                 <MusicPlayer
                                     songId={draft.selectedSongId}
@@ -185,7 +185,7 @@ export default function PreviewPage() {
                             <Button
                                 onClick={handlePublish}
                                 disabled={isPublishing}
-                                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+                                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full md:w-auto"
                             >
                                 {isPublishing
                                     ? 'Publishing...'
