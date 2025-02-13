@@ -135,7 +135,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
             </div>
 
             {/* Content */}
-            <div className="relative z-10 text-center max-w-lg">
+            <div className="relative z-10 text-center max-w-lg mx-auto">
                 <Heart className="md:w-16 md:h-16 w-8 h-8 text-[#E5C87D] drop-shadow-lg" />
                 <h1 className="lg:text-5xl md:text-4xl text-2xl font-serif italic text-center m-12 tracking-wide text-[#E5C87D] drop-shadow-sm whitespace-pre-wrap">
                     {title}

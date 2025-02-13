@@ -64,8 +64,9 @@ body {
         --chart-4: 280 65% 60%;
         --chart-5: 340 75% 55%;
     }
+
     .font-handwriting {
-        font-family: 'Dancing Script', cursive;
+        font-family: 'Petit Formal Script', cursive;
     }
 
     .bg-cream-paper {
