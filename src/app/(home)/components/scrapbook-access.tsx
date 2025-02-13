@@ -12,6 +12,7 @@ import Link from 'next/link';
 export function ScrapbookAccess() {
     const [password, setPassword] = useState('');
     const [isChecking, setIsChecking] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -83,8 +84,12 @@ export function ScrapbookAccess() {
                         <Button
                             variant="outline"
                             className="w-full border-pink-200 text-pink-600 hover:bg-pink-50"
+                            disabled={isLoading}
+                            onClick={() => setIsLoading(true)}
                         >
-                            Create New Scrapbook
+                            {isLoading
+                                ? 'Getting Ready...'
+                                : 'Create New Scrapbook'}
                         </Button>
                     </Link>
                 </div>
