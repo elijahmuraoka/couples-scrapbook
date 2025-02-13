@@ -157,7 +157,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 <div className="max-w-md w-full space-y-6 relative">
                     <div className="relative">
                         <div className="absolute md:-top-4 -top-2 left-1/2 -translate-x-1/2 w-32 md:h-8 h-6 bg-washi-tape rotate-2" />
-                        <p className="font-handwriting md:text-xl text-sm leading-relaxed text-gray-800 p-8 bg-white shadow-sm whitespace-pre-wrap">
+                        <p className="font-handwriting md:text-lg text-xs leading-relaxed text-gray-800 p-8 bg-white shadow-sm whitespace-pre-wrap">
                             {note}
                         </p>
                     </div>
