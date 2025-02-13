@@ -75,10 +75,38 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
     }, [photos, router, pathname]);
 
     useEffect(() => {
+        console.log('imagesLoaded: ', imagesLoaded);
+        console.log('photos.length: ', photos.length);
         if (imagesLoaded === photos.length) {
             setIsLoading(false);
         }
     }, [imagesLoaded, photos.length]);
+
+    useEffect(() => {
+        const imagePromises = photos.map((photo) => {
+            return new Promise((resolve, reject) => {
+                const img = document.createElement('img');
+                img.onload = () => {
+                    console.log(`Image loaded: ${photo.url}`);
+                    setImagesLoaded((prev) => prev + 1);
+                    resolve(img);
+                };
+                img.onerror = reject;
+                img.src = photo.url;
+            });
+        });
+
+        Promise.all(imagePromises)
+            .then(() => {
+                console.log('All images preloaded');
+            })
+            .catch((error) => {
+                console.error('Error preloading images:', error);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    }, [photos.length]);
 
     // Return null instead of loading state
     if (!photos || photos.length === 0) {
@@ -183,7 +211,6 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                                         ? 'vertical'
                                         : 'horizontal';
                                     setOrientations(newOrientations);
-                                    setImagesLoaded((prev) => prev + 1);
                                 }}
                             />
                         </div>
