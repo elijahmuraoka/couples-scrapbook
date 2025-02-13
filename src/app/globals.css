@@ -65,15 +65,19 @@ body {
         --chart-5: 340 75% 55%;
     }
     .font-handwriting {
-        font-family: 'Homemade Apple', cursive;
+        font-family: 'Dancing Script', cursive;
     }
-    
+
     .bg-cream-paper {
-        background-color: #FFFDF5;
+        background-color: #fffdf5;
     }
-    
+
     .bg-washi-tape {
-        background: linear-gradient(45deg, rgba(255,192,203,0.6), rgba(255,182,193,0.6));
+        background: linear-gradient(
+            45deg,
+            rgba(255, 192, 203, 0.6),
+            rgba(255, 182, 193, 0.6)
+        );
         backdrop-filter: blur(4px);
     }
 }

@@ -129,7 +129,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 <div className="max-w-md w-full space-y-6 relative">
                     <div className="relative">
                         <div className="absolute md:-top-4 -top-2 left-1/2 -translate-x-1/2 w-32 md:h-8 h-6 bg-washi-tape rotate-2" />
-                        <p className="font-handwriting md:text-xl text-sm leading-relaxed text-gray-600 p-8 bg-white/80 shadow-sm whitespace-pre-wrap">
+                        <p className="font-handwriting md:text-xl text-sm leading-relaxed text-gray-800 p-8 bg-white shadow-sm whitespace-pre-wrap">
                             {note}
                         </p>
                     </div>
@@ -208,14 +208,14 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                                 }}
                             >
                                 <div className="relative max-w-lg mx-auto">
-                                    <p className="font-handwriting md:text-base text-xs leading-relaxed text-gray-600 text-center whitespace-pre-wrap">
+                                    <p className="font-handwriting md:text-base text-sm leading-relaxed text-gray-800 text-center whitespace-pre-wrap">
                                         {photo.caption}
                                     </p>
 
                                     {photo.taken_at && (
                                         <div className="mt-2 mb-1 text-center relative">
                                             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-pink-200/50 to-transparent" />
-                                            <span className="font-handwriting text-xs md:text-sm text-gray-400 relative top-2">
+                                            <span className="font-handwriting text-xs md:text-sm text-gray-500 relative top-2">
                                                 {new Date(
                                                     photo.taken_at!
                                                 ).toLocaleDateString('en-US', {
