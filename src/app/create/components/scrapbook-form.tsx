@@ -7,7 +7,7 @@ import { useScrapbookStore } from '@/store/useScrapbookStore';
 import { ScrapbookDetails } from './scrapbook-details';
 import { PhotoUpload } from './photo-upload';
 import { SelectedPhotos } from './selected-photos';
-import { PreviewButton } from './submit-button';
+import { PreviewButton } from './preview-button';
 import { MusicSelector } from './music-selector';
 import { Button } from '@/components/ui/button';
 import { Trash2, BookOpen, ArrowLeft } from 'lucide-react';
@@ -29,6 +29,8 @@ export function ScrapbookForm() {
     };
 
     const handleSubmit = async () => {
+        setIsLoading(true);
+
         // Form validation
         if (!draft.title.trim()) {
             toast.error('Please enter a title for your scrapbook');
@@ -40,15 +42,12 @@ export function ScrapbookForm() {
             return;
         }
 
-        setIsLoading(true);
         try {
             // Instead of creating in database, we'll redirect to preview
             router.push(`/preview`);
         } catch (error) {
             console.error('Error:', error);
             toast.error('Something went wrong. Please try again.');
-        } finally {
-            setIsLoading(false);
         }
     };
 

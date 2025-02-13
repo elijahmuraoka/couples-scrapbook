@@ -58,11 +58,15 @@ function normalizeBookData(
 export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
     const { title, note, photos } = normalizeBookData(data);
     const [currentPage, setCurrentPage] = useState(0);
-    const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>(
-        'horizontal'
-    );
+    const [orientations, setOrientations] = useState<
+        Array<'vertical' | 'horizontal'>
+    >(new Array(photos.length).fill('horizontal'));
     const router = useRouter();
     const pathname = usePathname();
+
+    useEffect(() => {
+        console.log('orientation for photo page: ', currentPage, orientations);
+    }, [orientations, currentPage]);
 
     // Only redirect if we're not in preview and have no photos
     useEffect(() => {
@@ -139,9 +143,9 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 className="relative bg-cream-paper p-12"
             >
                 <div className="absolute inset-0 bg-[url('/handmade-paper.png')] opacity-20" />
-                <div className="relative flex flex-col h-full">
+                <div className="relative flex flex-col h-full w-full">
                     {/* Photo with washi tapes */}
-                    <div className="relative bg-white p-4 shadow-lg rotate-[-1deg] hover:rotate-0 transition-all duration-500 group">
+                    <div className="relative bg-white p-4  shadow-lg rotate-[-1deg] hover:rotate-0 transition-all duration-500 group max-h-[45vh]">
                         {/* Washi tapes */}
                         <div
                             className="absolute -top-3 left-6 w-24 h-5 bg-gradient-to-r from-pink-200/70 to-pink-300/70 rotate-12 shadow-sm group-hover:rotate-6 transition-transform duration-500"
@@ -170,42 +174,43 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                                     const img = e.target as HTMLImageElement;
                                     const isVertical =
                                         img.naturalHeight > img.naturalWidth;
-                                    setOrientation(
-                                        isVertical ? 'vertical' : 'horizontal'
-                                    );
+                                    const newOrientations = [...orientations];
+                                    newOrientations[index] = isVertical
+                                        ? 'vertical'
+                                        : 'horizontal';
+                                    setOrientations(newOrientations);
                                 }}
                             />
                         </div>
                     </div>
-
                     {/* Caption with decorative elements */}
                     {photo.caption && (
                         <div
                             className={cn(
                                 'transition-all duration-300',
-                                orientation === 'vertical'
-                                    ? 'absolute bottom-8 left-8 right-8'
-                                    : 'relative mt-8 px-8'
+                                orientations[index] === 'vertical'
+                                    ? 'absolute -bottom-6 -left-4 -right-4 z-10'
+                                    : 'relative mt-8 w-full'
                             )}
                         >
                             <div
-                                className="rounded-2xl p-5 shadow-md"
+                                className="rounded-2xl p-3.5"
                                 style={{
                                     boxShadow:
-                                        '0 4px 30px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.5)',
+                                        '0 4px 15px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.5)',
                                     background:
-                                        'linear-gradient(180deg, rgba(255,255,255) 0%, rgba(255,255,255,0.98) 100%)',
+                                        'linear-gradient(180deg, rgba(255,255,255) 0%, rgba(255,253,253,0.98) 100%)',
                                 }}
                             >
                                 <div className="relative max-w-lg mx-auto">
-                                    <p className="font-handwriting md:text-xl text-sm leading-relaxed text-gray-600 text-center whitespace-pre-wrap">
+                                    <p className="font-handwriting md:text-base text-xs leading-relaxed text-gray-600 text-center whitespace-pre-wrap">
                                         {photo.caption}
                                     </p>
 
                                     {photo.taken_at && (
                                         <div className="mt-2 mb-1 text-center relative">
                                             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-pink-200/50 to-transparent" />
-                                            <span className="font-handwriting text-sm text-gray-400 relative top-2">
+                                            <span className="font-handwriting text-xs md:text-sm text-gray-400 relative top-2">
                                                 {new Date(
                                                     photo.taken_at!
                                                 ).toLocaleDateString('en-US', {
@@ -218,7 +223,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                                     )}
 
                                     {/* Enhanced decorative hearts */}
-                                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-3">
+                                    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex gap-3">
                                         <Heart className="md:w-4 md:h-4 w-3 h-3 text-pink-400/80 drop-shadow-sm rotate-[-15deg] hover:scale-110 transition-transform" />
                                         <Heart className="md:w-4 md:h-4 w-3 h-3 text-pink-400/80 drop-shadow-sm hover:scale-110 transition-transform" />
                                         <Heart className="md:w-4 md:h-4 w-3 h-3 text-pink-400/80 drop-shadow-sm rotate-[15deg] hover:scale-110 transition-transform" />
@@ -262,7 +267,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
     ].filter(Boolean);
 
     return (
-        <div>
+        <div className="pb-8">
             <div className="md:aspect-[3/2] relative bg-white rounded-lg shadow-xl overflow-hidden min-h-[300px] md:min-h-[600px]">
                 <HTMLFlipBook
                     width={600}
@@ -292,7 +297,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                     swipeDistance={30}
                     clickEventForward={true}
                     useMouseEvents={true}
-                    renderOnlyPageLengthChange={true}
+                    renderOnlyPageLengthChange={false}
                 >
                     {pages}
                 </HTMLFlipBook>
