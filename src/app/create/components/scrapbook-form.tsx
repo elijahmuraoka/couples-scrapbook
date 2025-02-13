@@ -29,25 +29,26 @@ export function ScrapbookForm() {
     };
 
     const handleSubmit = async () => {
-        setIsLoading(true);
-
-        // Form validation
-        if (!draft.title.trim()) {
-            toast.error('Please enter a title for your scrapbook');
-            return;
-        }
-
-        if (draft.selectedFiles.length === 0) {
-            toast.error('Please select at least one photo');
-            return;
-        }
-
         try {
+            setIsLoading(true);
+
+            // Form validation
+            if (!draft.title.trim()) {
+                throw new Error('Please enter a title for your scrapbook');
+            }
+
+            if (draft.selectedFiles.length === 0) {
+                throw new Error('Please select at least one photo');
+            }
             // Instead of creating in database, we'll redirect to preview
             router.push(`/preview`);
         } catch (error) {
             console.error('Error:', error);
-            toast.error('Something went wrong. Please try again.');
+            toast.error(
+                (error as Error).message ??
+                    'Something went wrong. Please try again.'
+            );
+            setIsLoading(false);
         }
     };
 

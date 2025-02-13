@@ -63,10 +63,8 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
     >(new Array(photos.length).fill('horizontal'));
     const router = useRouter();
     const pathname = usePathname();
-
-    useEffect(() => {
-        console.log('orientation for photo page: ', currentPage, orientations);
-    }, [orientations, currentPage]);
+    const [imagesLoaded, setImagesLoaded] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Only redirect if we're not in preview and have no photos
     useEffect(() => {
@@ -75,6 +73,12 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
             router.push('/');
         }
     }, [photos, router, pathname]);
+
+    useEffect(() => {
+        if (imagesLoaded === photos.length) {
+            setIsLoading(false);
+        }
+    }, [imagesLoaded, photos.length]);
 
     // Return null instead of loading state
     if (!photos || photos.length === 0) {
@@ -179,6 +183,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                                         ? 'vertical'
                                         : 'horizontal';
                                     setOrientations(newOrientations);
+                                    setImagesLoaded((prev) => prev + 1);
                                 }}
                             />
                         </div>
@@ -269,6 +274,16 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
     return (
         <div className="pb-8">
             <div className="md:aspect-[3/2] relative bg-white rounded-lg shadow-xl overflow-hidden min-h-[300px] md:min-h-[600px]">
+                {isLoading && (
+                    <div className="absolute inset-0 z-50 bg-white flex items-center justify-center">
+                        <div className="text-center space-y-4">
+                            <div className="w-12 h-12 border-4 border-pink-100 border-t-pink-400 rounded-full animate-spin mx-auto" />
+                            <p className="font-handwriting text-gray-500">
+                                Loading your memories...
+                            </p>
+                        </div>
+                    </div>
+                )}
                 <HTMLFlipBook
                     width={600}
                     height={800}
