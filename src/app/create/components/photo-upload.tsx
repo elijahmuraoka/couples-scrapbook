@@ -36,32 +36,31 @@ export function PhotoUpload({
 }: PhotoUploadProps) {
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
-        const totalFiles = selectedFiles.length + files.length;
-
-        if (totalFiles > 10) {
-            toast.error('You can only upload up to 10 photos');
-            return;
-        }
 
         // Filter out files larger than 10MB
-        files.filter((file) => {
+        const validFiles = files.filter((file) => {
             if (file.size > MAX_FILE_SIZE) {
-                alert(
-                    `File ${file.name} is too large. Maximum size is ${
-                        MAX_FILE_SIZE / (1024 * 1024)
-                    }MB`
+                toast.error(
+                    `${file.name} is too large (max ${MAX_FILE_SIZE / (1024 * 1024)}MB)`
                 );
                 return false;
             }
             return true;
         });
 
+        if (validFiles.length === 0) return;
+
+        if (selectedFiles.length + validFiles.length > 10) {
+            toast.error('You can only upload up to 10 photos');
+            return;
+        }
+
         // Create object URLs for previews
-        const newPreviews = files.map((file) => URL.createObjectURL(file));
+        const newPreviews = validFiles.map((file) => URL.createObjectURL(file));
 
         // Extract metadata and update state
         const photosWithMetadata = await Promise.all(
-            files.map(async (file) => {
+            validFiles.map(async (file) => {
                 const metadata = await extractMetadata(file);
                 return { file, metadata };
             })
@@ -76,7 +75,7 @@ export function PhotoUpload({
             ...metadata,
             ...photosWithMetadata.map((p) => p.metadata),
         ]);
-        setCaptions([...captions, ...Array(files.length).fill('')]);
+        setCaptions([...captions, ...Array(validFiles.length).fill('')]);
 
         // Reset input
         if (e.target) {

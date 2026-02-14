@@ -173,3 +173,8 @@ body {
         transition-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
     }
 }
+
+/* Prevent page-flip pages from overflowing their fixed-size containers */
+.stf__item {
+    overflow: hidden;
+}

@@ -12,6 +12,7 @@ import {
 } from '@/types/scrapbook';
 import { cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
+import { AutoFitText } from './auto-fit-text';
 
 interface BookViewerProps {
     data: ScrapbookDraft | Scrapbook;
@@ -63,7 +64,6 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
     >(new Array(photos.length).fill('horizontal'));
     const router = useRouter();
     const pathname = usePathname();
-    const [imagesLoaded, setImagesLoaded] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
     // Only redirect if we're not in preview and have no photos
@@ -74,39 +74,35 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
         }
     }, [photos, router, pathname]);
 
+    // Preload all images before showing the book
     useEffect(() => {
-        console.log('imagesLoaded: ', imagesLoaded);
-        console.log('photos.length: ', photos.length);
-        if (imagesLoaded === photos.length) {
-            setIsLoading(false);
-        }
-    }, [imagesLoaded, photos.length]);
+        if (photos.length === 0) return;
 
-    useEffect(() => {
-        const imagePromises = photos.map((photo) => {
-            return new Promise((resolve, reject) => {
-                const img = document.createElement('img');
-                img.onload = () => {
-                    console.log(`Image loaded: ${photo.url}`);
-                    setImagesLoaded((prev) => prev + 1);
-                    resolve(img);
-                };
-                img.onerror = reject;
-                img.src = photo.url;
-            });
-        });
+        let cancelled = false;
 
-        Promise.all(imagePromises)
-            .then(() => {
-                console.log('All images preloaded');
-            })
-            .catch((error) => {
-                console.error('Error preloading images:', error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
-    }, [photos.length]);
+        const preload = async () => {
+            try {
+                await Promise.all(
+                    photos.map(
+                        (photo) =>
+                            new Promise<void>((resolve, reject) => {
+                                const img = document.createElement('img');
+                                img.onload = () => resolve();
+                                img.onerror = () => reject(new Error(`Failed to load: ${photo.url}`));
+                                img.src = photo.url;
+                            })
+                    )
+                );
+            } catch {
+                // Still show the book even if some images fail
+            } finally {
+                if (!cancelled) setIsLoading(false);
+            }
+        };
+
+        preload();
+        return () => { cancelled = true; };
+    }, [photos]);
 
     // Return null instead of loading state
     if (!photos || photos.length === 0) {
@@ -151,17 +147,25 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
         note && (
             <div
                 key="note"
-                className="relative bg-cream-paper p-12 flex flex-col items-center justify-center"
+                className="relative bg-cream-paper"
             >
                 <div className="absolute inset-0 bg-[url('/handmade-paper.png')] opacity-20" />
-                <div className="max-w-md w-full space-y-6 relative">
-                    <div className="relative">
-                        <div className="absolute md:-top-4 -top-2 left-1/2 -translate-x-1/2 w-32 md:h-8 h-6 bg-washi-tape rotate-2" />
-                        <p className="font-handwriting md:text-lg text-xs leading-relaxed text-gray-800 p-8 bg-white shadow-sm whitespace-pre-wrap">
-                            {note}
-                        </p>
+                <div className="absolute inset-0 flex flex-col items-center p-6 md:p-10">
+                    {/* Washi tape decoration */}
+                    <div className="relative w-full max-w-md flex-shrink-0 h-4">
+                        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-32 md:h-8 h-6 bg-washi-tape rotate-2" />
                     </div>
-                    <div className="flex justify-center">
+                    {/* White card with auto-fitting note text */}
+                    <div className="relative w-full max-w-md flex-1 min-h-0 mt-2 bg-white shadow-sm">
+                        <AutoFitText
+                            text={note}
+                            className="font-handwriting leading-relaxed text-gray-800 whitespace-pre-wrap p-4 md:p-8"
+                            minFontSize={6}
+                            maxFontSize={22}
+                        />
+                    </div>
+                    {/* Heart decoration */}
+                    <div className="flex justify-center flex-shrink-0 mt-3">
                         <Heart className="md:w-8 md:h-8 w-6 h-6 text-pink-300 opacity-50" />
                     </div>
                 </div>
@@ -172,12 +176,12 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
         ...photos.map((photo, index) => (
             <div
                 key={`photo-${index}`}
-                className="relative bg-cream-paper p-12"
+                className="relative bg-cream-paper p-6 md:p-10 h-full overflow-hidden"
             >
                 <div className="absolute inset-0 bg-[url('/handmade-paper.png')] opacity-20" />
                 <div className="relative flex flex-col h-full w-full">
                     {/* Photo with washi tapes */}
-                    <div className="relative bg-white p-4  shadow-lg rotate-[-1deg] hover:rotate-0 transition-all duration-500 group max-h-[45vh]">
+                    <div className="relative bg-white p-2 md:p-4 shadow-lg rotate-[-1deg] hover:rotate-0 transition-all duration-500 group flex-1 min-h-0">
                         {/* Washi tapes */}
                         <div
                             className="absolute -top-3 left-6 w-24 h-5 bg-gradient-to-r from-pink-200/70 to-pink-300/70 rotate-12 shadow-sm group-hover:rotate-6 transition-transform duration-500"
@@ -194,7 +198,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                             }}
                         />
 
-                        {/* Photo container without any overlay effects */}
+                        {/* Photo container */}
                         <div className="relative h-full">
                             <Image
                                 src={photo.url}
@@ -217,16 +221,9 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                     </div>
                     {/* Caption with decorative elements */}
                     {photo.caption && (
-                        <div
-                            className={cn(
-                                'transition-all duration-300',
-                                orientations[index] === 'vertical'
-                                    ? 'absolute -bottom-6 -left-4 -right-4 z-10'
-                                    : 'relative mt-8 w-full'
-                            )}
-                        >
+                        <div className="relative mt-3 md:mt-4 w-full flex-shrink-0">
                             <div
-                                className="rounded-2xl p-3.5"
+                                className="rounded-2xl p-2.5 md:p-3.5"
                                 style={{
                                     boxShadow:
                                         '0 4px 15px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.5)',
@@ -235,14 +232,14 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                                 }}
                             >
                                 <div className="relative max-w-lg mx-auto">
-                                    <p className="font-handwriting md:text-base text-sm leading-relaxed text-gray-800 text-center whitespace-pre-wrap">
+                                    <p className="font-handwriting md:text-base text-xs leading-relaxed text-gray-800 text-center whitespace-pre-wrap">
                                         {photo.caption}
                                     </p>
 
                                     {photo.taken_at && (
-                                        <div className="mt-2 mb-1 text-center relative">
+                                        <div className="mt-1.5 mb-0.5 text-center relative">
                                             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-pink-200/50 to-transparent" />
-                                            <span className="font-handwriting text-xs md:text-sm text-gray-500 relative top-2">
+                                            <span className="font-handwriting text-xs text-gray-500 relative top-1">
                                                 {new Date(
                                                     photo.taken_at!
                                                 ).toLocaleDateString('en-US', {
@@ -253,13 +250,6 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                                             </span>
                                         </div>
                                     )}
-
-                                    {/* Enhanced decorative hearts */}
-                                    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex gap-3">
-                                        <Heart className="md:w-4 md:h-4 w-3 h-3 text-pink-400/80 drop-shadow-sm rotate-[-15deg] hover:scale-110 transition-transform" />
-                                        <Heart className="md:w-4 md:h-4 w-3 h-3 text-pink-400/80 drop-shadow-sm hover:scale-110 transition-transform" />
-                                        <Heart className="md:w-4 md:h-4 w-3 h-3 text-pink-400/80 drop-shadow-sm rotate-[15deg] hover:scale-110 transition-transform" />
-                                    </div>
                                 </div>
                             </div>
                         </div>
