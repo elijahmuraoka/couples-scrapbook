@@ -1,23 +1,27 @@
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { Photo, Scrapbook } from '@/types/scrapbook';
+import { Scrapbook } from '@/types/scrapbook';
 import ScrapbookMain from './components/scrapbook-main';
+import { createClient } from '@/lib/supabase/server';
 
 async function fetchScrapbook(code: string): Promise<{
     success: boolean;
     scrapbook: Scrapbook | null;
 }> {
     try {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_APP_URL}/api/scrapbooks?code=${code}`,
-            { cache: 'no-store' }
-        );
-        const data = (await response.json()) as Scrapbook;
-        data.photos = data.photos.sort(
-            (a: Photo, b: Photo) => a.order - b.order
-        );
-        return { success: true, scrapbook: data };
+        const supabase = await createClient();
+        const { data, error } = await supabase
+            .from('scrapbooks')
+            .select('*, photos(*)')
+            .eq('code', code)
+            .single();
+
+        if (error) throw error;
+
+        const scrapbook = data as unknown as Scrapbook;
+        scrapbook.photos = scrapbook.photos.sort((a, b) => a.order - b.order);
+        return { success: true, scrapbook };
     } catch (error) {
         console.error('Error fetching scrapbook:', error);
         return { success: false, scrapbook: null };

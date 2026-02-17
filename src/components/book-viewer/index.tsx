@@ -10,7 +10,6 @@ import {
     Photo,
     isScrapbook,
 } from '@/types/scrapbook';
-import { cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { AutoFitText } from './auto-fit-text';
 

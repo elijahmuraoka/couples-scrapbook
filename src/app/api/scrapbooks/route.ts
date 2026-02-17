@@ -1,12 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { nanoid } from 'nanoid';
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 import { ScrapbookDraft } from '@/types/scrapbook';
 
 // Create a new scrapbook
 export async function POST(req: Request) {
     try {
+        const supabase = await createClient();
         const body = await req.json();
         const draft: Omit<ScrapbookDraft, 'previews' | 'selectedFiles'> = body;
 
