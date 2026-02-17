@@ -9,10 +9,11 @@ import { toast } from 'sonner';
 import { ArrowLeft, Eye } from 'lucide-react';
 import { MusicPlayer } from '@/components/music-player';
 import { ScrapbookDraft } from '@/types/scrapbook';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import confetti from 'canvas-confetti';
 
 async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
+    const supabase = createClient();
     const photoPromises = draft.previews.map(async (blobUrl, index) => {
         // Convert blob URL to base64
         const response = await fetch(blobUrl);
