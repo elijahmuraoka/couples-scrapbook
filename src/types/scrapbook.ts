@@ -1,6 +1,7 @@
 export interface ScrapbookDraft {
     title: string;
     note: string | null;
+    senderName: string | null;
     selectedFiles: File[];
     previews: string[];
     captions: string[];
@@ -14,6 +15,7 @@ export interface Scrapbook {
     code: string; // Unique URL code
     title: string; // Required
     note?: string; // Optional
+    sender_name?: string; // Optional
     music_id?: string; // Optional
     is_published: boolean; // Defaults to false
     created_at: Date; // Auto-generated

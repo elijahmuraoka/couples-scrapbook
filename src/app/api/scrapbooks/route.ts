@@ -18,6 +18,7 @@ export async function POST(req: Request) {
             .insert({
                 title: draft.title,
                 note: draft.note,
+                sender_name: draft.senderName,
                 code,
                 music_id: draft.selectedSongId,
                 is_published: true,

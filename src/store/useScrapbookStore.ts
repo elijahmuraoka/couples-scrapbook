@@ -10,6 +10,7 @@ interface ScrapbookStore {
 const initialState: ScrapbookDraft = {
     title: '',
     note: null,
+    senderName: null,
     selectedFiles: [],
     previews: [],
     captions: [],

@@ -17,15 +17,20 @@ interface ScrapbookDetailsProps {
     setTitle: (title: string) => void;
     note: string;
     setNote: (note: string) => void;
+    senderName: string;
+    setSenderName: (name: string) => void;
 }
 
 const MAX_TITLE_LENGTH = 50;
+const MAX_SENDER_NAME_LENGTH = 30;
 
 export function ScrapbookDetails({
     title,
     setTitle,
     note,
     setNote,
+    senderName,
+    setSenderName,
 }: ScrapbookDetailsProps) {
     const maxNoteLength = 1000; // Longer limit for the note
     const noteCharCount = note.length;
@@ -92,6 +97,29 @@ export function ScrapbookDetails({
                     <div className="text-xs sm:text-sm text-gray-500 text-right">
                         {noteCharCount}/{maxNoteLength} characters
                     </div>
+                </div>
+
+                <div className="space-y-2">
+                    <div className="flex justify-between">
+                        <Label htmlFor="senderName" className="text-gray-600">
+                            Your Name (Optional)
+                        </Label>
+                        <span className="text-xs sm:text-sm text-gray-400">
+                            {senderName.length}/{MAX_SENDER_NAME_LENGTH}
+                        </span>
+                    </div>
+                    <Input
+                        id="senderName"
+                        value={senderName}
+                        onChange={(e) => {
+                            if (e.target.value.length <= MAX_SENDER_NAME_LENGTH) {
+                                setSenderName(e.target.value);
+                            }
+                        }}
+                        placeholder="Signs the note page with &quot;with love from [name]&quot;"
+                        className="w-full border-pink-200 focus-visible:ring-pink-500 text-xs sm:text-sm"
+                        maxLength={MAX_SENDER_NAME_LENGTH}
+                    />
                 </div>
             </CardContent>
         </Card>

@@ -21,6 +21,7 @@ interface BookViewerProps {
 interface NormalizedBookData {
     title: string;
     note: string | null;
+    senderName: string | null;
     photos: Omit<Photo, 'id' | 'scrapbook_id' | 'created_at'>[];
 }
 
@@ -32,6 +33,7 @@ function normalizeBookData(
         return {
             title: data.title,
             note: data.note || null,
+            senderName: data.sender_name || null,
             photos: data.photos.map((photo) => ({
                 url: photo.url,
                 caption: photo.caption,
@@ -44,6 +46,7 @@ function normalizeBookData(
         return {
             title: data.title,
             note: data.note || null,
+            senderName: data.senderName || null,
             photos: data.previews.map((url, i) => ({
                 url,
                 caption: data.captions[i],
@@ -56,7 +59,7 @@ function normalizeBookData(
 }
 
 export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
-    const { title, note, photos } = useMemo(() => normalizeBookData(data), [data]);
+    const { title, note, senderName, photos } = useMemo(() => normalizeBookData(data), [data]);
     const [currentPage, setCurrentPage] = useState(0);
     const [orientations, setOrientations] = useState<
         Array<'vertical' | 'horizontal'>
@@ -163,8 +166,13 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                             maxFontSize={22}
                         />
                     </div>
-                    {/* Heart decoration */}
-                    <div className="flex justify-center flex-shrink-0 mt-3">
+                    {/* Sender signature + heart */}
+                    <div className="flex flex-col items-center flex-shrink-0 mt-3 gap-1">
+                        {senderName && (
+                            <p className="font-handwriting text-xs md:text-sm text-pink-400/80 italic">
+                                with love from {senderName}
+                            </p>
+                        )}
                         <Heart className="md:w-8 md:h-8 w-6 h-6 text-pink-300 opacity-50" />
                     </div>
                 </div>
