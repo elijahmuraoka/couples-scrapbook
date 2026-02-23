@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { BookViewer } from '@/components/book-viewer';
 import { toast } from 'sonner';
-import { ArrowLeft, Eye } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { MusicPlayer } from '@/components/music-player';
 import { ScrapbookDraft } from '@/types/scrapbook';
 import { createClient } from '@/lib/supabase/client';
@@ -159,10 +159,8 @@ export default function PreviewPage() {
                 {/* Content Area */}
                 <div className="space-y-6 w-full">
                     <div className="flex flex-col md:flex-row gap-4 items-center md:justify-between pb-6 border-b w-full">
+                        {/* Phase 2: Lighter header — no icon box for content frames (vs form sections) */}
                         <div className="flex items-center gap-4">
-                            <div className="p-2 bg-pink-50 rounded-xl">
-                                <Eye className="w-8 h-8 text-pink-500" />
-                            </div>
                             <div>
                                 <h1 className="text-4xl font-serif italic text-gray-900">
                                     Preview Your Scrapbook
@@ -171,25 +169,22 @@ export default function PreviewPage() {
                                     Review your scrapbook before publishing
                                 </p>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-4 w-full md:w-auto max-w-[400px]">
                             {draft.selectedSongId && (
                                 <MusicPlayer
                                     songId={draft.selectedSongId}
-                                    className="bg-white shadow-sm border border-pink-100 rounded-lg"
                                     autoPlay={true}
                                 />
                             )}
-                            <Button
-                                onClick={handlePublish}
-                                disabled={isPublishing}
-                                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full md:w-auto"
-                            >
-                                {isPublishing
-                                    ? 'Publishing...'
-                                    : 'Publish & Share'}
-                            </Button>
                         </div>
+                        <Button
+                            onClick={handlePublish}
+                            disabled={isPublishing}
+                            className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full md:w-auto"
+                        >
+                            {isPublishing
+                                ? 'Publishing...'
+                                : 'Publish & Share'}
+                        </Button>
                     </div>
 
                     <BookViewer data={draft} />

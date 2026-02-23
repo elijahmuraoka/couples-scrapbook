@@ -32,6 +32,16 @@
         --input: 342 20% 87%;
         --ring: 342 75% 55%;
 
+        /* Semantic romantic palette — use these for theming.
+           Maps to Tailwind pink-* values currently used throughout the app.
+           To re-theme: change these values instead of find-replacing classes.
+           Phase 2 audit: added for future theme support. */
+        --romantic: 342 75% 55%;           /* pink-500 — primary brand color */
+        --romantic-hover: 342 75% 47%;     /* pink-600 — hover states */
+        --romantic-light: 342 45% 96%;     /* pink-50 — light backgrounds */
+        --romantic-border: 342 40% 87%;    /* pink-200 — borders, dividers */
+        --romantic-muted: 342 40% 92%;     /* pink-100 — subtle backgrounds */
+
         --radius: 0.75rem;
     }
     .dark {

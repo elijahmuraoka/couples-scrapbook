@@ -6,7 +6,9 @@ export function HomeHero() {
             <div className="flex justify-center">
                 <Heart className="w-12 h-12 text-pink-500 animate-pulse animate-float" />
             </div>
-            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-pink-500 to-rose-500 text-transparent bg-clip-text p-2">
+            {/* Phase 2: Serif italic to match create/preview/scrapbook headers.
+                Gradient kept but applied to the unified type style. */}
+            <h1 className="text-4xl font-serif italic tracking-tight bg-gradient-to-r from-pink-500 to-rose-500 text-transparent bg-clip-text p-2">
                 A Gift From Your Broke But Loving Partner
             </h1>
             <p className="text-gray-600 lg:text-lg italic">

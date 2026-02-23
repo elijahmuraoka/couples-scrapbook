@@ -132,14 +132,14 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 <div className="absolute bottom-[-2px] right-[-2px] w-12 h-12 border-b-2 border-r-2 border-[#E5C87D]" />
             </div>
 
-            {/* Content */}
-            <div className="relative z-10 text-center max-w-lg mx-auto">
-                <Heart className="md:w-16 md:h-16 w-8 h-8 text-[#E5C87D] drop-shadow-lg" />
-                <h1 className="lg:text-5xl md:text-4xl text-2xl font-serif italic text-center m-12 tracking-wide text-[#E5C87D] drop-shadow-sm whitespace-pre-wrap">
+            {/* Content — Phase 3: explicit centering, consistent spacing via space-y */}
+            <div className="relative z-10 flex flex-col items-center text-center max-w-lg mx-auto space-y-6">
+                <Heart className="md:w-16 md:h-16 w-8 h-8 mx-auto text-[#E5C87D] drop-shadow-lg" />
+                <h1 className="lg:text-5xl md:text-4xl text-2xl font-serif italic tracking-wide text-[#E5C87D] drop-shadow-sm whitespace-pre-wrap">
                     {title}
                 </h1>
-                <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-[#E5C87D]/60 to-transparent mx-auto my-4" />
-                <p className="font-handwriting md:text-xl text-sm [#E5C87D]/80 md:mt-8 mt-4">
+                <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-[#E5C87D]/60 to-transparent" />
+                <p className="font-handwriting md:text-xl text-sm text-[#E5C87D]/80">
                     Open to view our story
                 </p>
             </div>
@@ -187,18 +187,21 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
             >
                 <div className="absolute inset-0 bg-[url('/handmade-paper.png')] opacity-20" />
                 <div className="relative flex flex-col h-full w-full">
-                    {/* Photo with washi tapes */}
-                    <div className="relative bg-white p-2 md:p-4 shadow-lg rotate-[-1deg] hover:rotate-0 transition-all duration-500 group flex-1 min-h-0">
-                        {/* Washi tapes */}
+                    {/* Photo with washi tapes — Phase 3: removed hover animations on
+                        washi tapes and photo frame. In a page-flip book, the flip IS the
+                        interaction. Hover effects competed with it and felt busy. Static
+                        rotation gives the scrapbook feel without the motion noise. */}
+                    <div className="relative bg-white p-2 md:p-4 shadow-lg rotate-[-1deg] flex-1 min-h-0">
+                        {/* Washi tapes — static rotation, no hover */}
                         <div
-                            className="absolute -top-3 left-6 w-24 h-5 bg-gradient-to-r from-pink-200/70 to-pink-300/70 rotate-12 shadow-sm group-hover:rotate-6 transition-transform duration-500"
+                            className="absolute -top-3 left-6 w-24 h-5 bg-gradient-to-r from-pink-200/70 to-pink-300/70 rotate-12 shadow-sm"
                             style={{
                                 maskImage:
                                     'linear-gradient(to right, transparent 0%, black 2%, black 98%, transparent 100%)',
                             }}
                         />
                         <div
-                            className="absolute -top-4 right-8 w-16 h-5 bg-gradient-to-r from-rose-200/60 to-pink-200/60 -rotate-6 shadow-sm group-hover:-rotate-3 transition-transform duration-500"
+                            className="absolute -top-4 right-8 w-16 h-5 bg-gradient-to-r from-rose-200/60 to-pink-200/60 -rotate-6 shadow-sm"
                             style={{
                                 maskImage:
                                     'linear-gradient(to right, transparent 0%, black 2%, black 98%, transparent 100%)',
@@ -281,13 +284,14 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 <div className="absolute bottom-[-2px] right-[-2px] w-12 h-12 border-b-2 border-r-2 border-[#E5C87D]" />
             </div>
 
-            {/* Content */}
-            <div className="relative z-10 text-center max-w-lg">
-                <Heart className="md:w-16 md:h-16 w-8 h-8 text-[#E5C87D] drop-shadow-lg" />
-                <h2 className="font-serif md:text-3xl text-xl italic text-[#E5C87D] mb-4">
+            {/* Content — Phase 3: mirrors front cover structure exactly (flex col,
+                items-center, space-y-6, mx-auto on heart, consistent divider width) */}
+            <div className="relative z-10 flex flex-col items-center text-center max-w-lg mx-auto space-y-6">
+                <Heart className="md:w-16 md:h-16 w-8 h-8 mx-auto text-[#E5C87D] drop-shadow-lg" />
+                <h2 className="font-serif md:text-3xl text-xl italic text-[#E5C87D]">
                     The End
                 </h2>
-                <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-[#E5C87D]/60 to-transparent mx-auto my-4" />
+                <div className="w-32 h-[1px] bg-gradient-to-r from-transparent via-[#E5C87D]/60 to-transparent" />
                 <p className="font-handwriting md:text-xl text-sm text-[#E5C87D]/80">
                     ...but our story continues
                 </p>
@@ -298,10 +302,11 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
     return (
         <div className="pb-8">
             <div className="md:aspect-[3/2] relative bg-white rounded-lg shadow-xl overflow-hidden min-h-[300px] md:min-h-[600px]">
+                {/* Phase 3: Pulsing heart instead of generic spinner — on-brand loading state */}
                 {isLoading && (
                     <div className="absolute inset-0 z-50 bg-white flex items-center justify-center">
                         <div className="text-center space-y-4">
-                            <div className="w-12 h-12 border-4 border-pink-100 border-t-pink-400 rounded-full animate-spin mx-auto" />
+                            <Heart className="w-12 h-12 text-pink-400 mx-auto animate-pulse" />
                             <p className="font-handwriting text-gray-500">
                                 Loading your memories...
                             </p>
@@ -343,12 +348,17 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
             </div>
 
             {showNavigation && (
-                <div className="text-center mt-6 text-gray-500">
-                    Page{' '}
-                    {currentPage === 0
-                        ? 1
-                        : Math.ceil((currentPage + 1) / 2) + 1}{' '}
-                    of {Math.ceil((photos.length + (note ? 4 : 3)) / 2)}
+                <div className="flex items-center justify-center gap-1.5 mt-6">
+                    {Array.from({ length: pages.length }).map((_, i) => (
+                        <div
+                            key={i}
+                            className={`rounded-full transition-all duration-300 ${
+                                currentPage === i
+                                    ? 'w-2 h-2 bg-pink-400'
+                                    : 'w-1.5 h-1.5 bg-gray-300'
+                            }`}
+                        />
+                    ))}
                 </div>
             )}
         </div>
