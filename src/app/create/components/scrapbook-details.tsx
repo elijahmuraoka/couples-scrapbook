@@ -116,7 +116,7 @@ export function ScrapbookDetails({
                                 setSenderName(e.target.value);
                             }
                         }}
-                        placeholder="Signs the note page with &quot;with love from [name]&quot;"
+                        placeholder="e.g. Elijah — appears as &quot;Love Elijah&quot;"
                         className="w-full border-pink-200 focus-visible:ring-pink-500 text-xs sm:text-sm"
                         maxLength={MAX_SENDER_NAME_LENGTH}
                     />
