@@ -1,23 +1,48 @@
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { Photo, Scrapbook } from '@/types/scrapbook';
+import { Scrapbook, Photo } from '@/types/scrapbook';
 import ScrapbookMain from './components/scrapbook-main';
+import { createClient } from '@/lib/supabase/server';
 
 async function fetchScrapbook(code: string): Promise<{
     success: boolean;
     scrapbook: Scrapbook | null;
 }> {
     try {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_APP_URL}/api/scrapbooks?code=${code}`,
-            { cache: 'no-store' }
-        );
-        const data = (await response.json()) as Scrapbook;
-        data.photos = data.photos.sort(
-            (a: Photo, b: Photo) => a.order - b.order
-        );
-        return { success: true, scrapbook: data };
+        const supabase = await createClient();
+        const { data, error } = await supabase
+            .from('scrapbooks')
+            .select('*, photos(*)')
+            .eq('code', code)
+            .single();
+
+        if (error) throw error;
+
+        // Map DB rows to app types (taken_at/created_at come back as strings from Supabase)
+        const scrapbook: Scrapbook = {
+            id: data.id,
+            code: data.code,
+            title: data.title,
+            note: data.note ?? undefined,
+            sender_name: data.sender_name ?? undefined,
+            music_id: data.music_id ?? undefined,
+            is_published: data.is_published,
+            created_at: new Date(data.created_at),
+            photos: ((data as Record<string, unknown>).photos as Array<Record<string, unknown>>)
+                .map((p): Photo => ({
+                    id: p.id as string,
+                    scrapbook_id: p.scrapbook_id as string,
+                    url: p.url as string,
+                    order: p.order as number,
+                    caption: (p.caption as string) ?? undefined,
+                    location: (p.location as string) ?? undefined,
+                    taken_at: p.taken_at ? new Date(p.taken_at as string) : undefined,
+                    created_at: new Date(p.created_at as string),
+                }))
+                .sort((a, b) => a.order - b.order),
+        };
+        return { success: true, scrapbook };
     } catch (error) {
         console.error('Error fetching scrapbook:', error);
         return { success: false, scrapbook: null };

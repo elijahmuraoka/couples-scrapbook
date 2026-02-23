@@ -1,8 +1,5 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
-
 import { useState, useEffect } from 'react';
 import { useScrapbookStore } from '@/store/useScrapbookStore';
 import { Button } from '@/components/ui/button';
@@ -12,10 +9,11 @@ import { toast } from 'sonner';
 import { ArrowLeft, Eye } from 'lucide-react';
 import { MusicPlayer } from '@/components/music-player';
 import { ScrapbookDraft } from '@/types/scrapbook';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import confetti from 'canvas-confetti';
 
 async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
+    const supabase = createClient();
     const photoPromises = draft.previews.map(async (blobUrl, index) => {
         // Convert blob URL to base64
         const response = await fetch(blobUrl);
@@ -52,7 +50,7 @@ async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
             url: publicUrl,
             order: index,
             caption: draft.captions[index],
-            taken_at: draft.metadata[index]?.takenAt,
+            taken_at: draft.metadata[index]?.takenAt?.toISOString() ?? null,
             location: draft.metadata[index]?.location,
         });
     });

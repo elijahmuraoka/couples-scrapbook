@@ -114,6 +114,8 @@ export function ScrapbookForm() {
                     setTitle={(title) => updateDraft({ title })}
                     note={draft.note || ''}
                     setNote={(note) => updateDraft({ note })}
+                    senderName={draft.senderName || ''}
+                    setSenderName={(senderName) => updateDraft({ senderName })}
                 />
                 <MusicSelector
                     selectedSongId={draft.selectedSongId}
