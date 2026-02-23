@@ -157,22 +157,22 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                     <div className="relative w-full max-w-md flex-shrink-0 h-4">
                         <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-32 md:h-8 h-6 bg-washi-tape rotate-2" />
                     </div>
-                    {/* White card with auto-fitting note text */}
+                    {/* White card with auto-fitting note text + signature */}
                     <div className="relative w-full max-w-md flex-1 min-h-0 mt-2 bg-white shadow-sm">
                         <AutoFitText
                             text={note}
-                            className="font-handwriting leading-relaxed text-gray-800 whitespace-pre-wrap p-4 md:p-8"
+                            className="font-handwriting leading-relaxed text-gray-800 whitespace-pre-wrap p-4 md:p-8 pb-0 md:pb-0"
                             minFontSize={6}
                             maxFontSize={22}
+                            footer={senderName ? (
+                                <p className="font-handwriting text-center pt-4 md:pt-6 pb-4 md:pb-8 px-4 md:px-8 text-rose-400" style={{ fontSize: '1.15em' }}>
+                                    Love, {senderName}
+                                </p>
+                            ) : undefined}
                         />
                     </div>
-                    {/* Sender signature + heart */}
-                    <div className="flex flex-col items-center flex-shrink-0 mt-3 gap-1">
-                        {senderName && (
-                            <p className="font-handwriting text-xs md:text-sm text-pink-400/80 italic">
-                                with love from {senderName}
-                            </p>
-                        )}
+                    {/* Heart decoration */}
+                    <div className="flex justify-center flex-shrink-0 mt-3">
                         <Heart className="md:w-8 md:h-8 w-6 h-6 text-pink-300 opacity-50" />
                     </div>
                 </div>

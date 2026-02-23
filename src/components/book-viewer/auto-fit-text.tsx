@@ -1,12 +1,13 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, ReactNode } from 'react';
 
 interface AutoFitTextProps {
     text: string;
     className?: string;
     minFontSize?: number;
     maxFontSize?: number;
+    footer?: ReactNode;
 }
 
 export function AutoFitText({
@@ -14,15 +15,16 @@ export function AutoFitText({
     className,
     minFontSize = 6,
     maxFontSize = 22,
+    footer,
 }: AutoFitTextProps) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLParagraphElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
     const [fontSize, setFontSize] = useState<number | null>(null);
 
     const fitText = useCallback(() => {
         const container = containerRef.current;
-        const textEl = textRef.current;
-        if (!container || !textEl) return;
+        const content = contentRef.current;
+        if (!container || !content) return;
 
         const availableHeight = container.clientHeight;
         if (availableHeight === 0) return;
@@ -32,9 +34,9 @@ export function AutoFitText({
 
         while (high - low > 0.5) {
             const mid = (low + high) / 2;
-            textEl.style.fontSize = `${mid}px`;
+            content.style.fontSize = `${mid}px`;
 
-            if (textEl.scrollHeight <= availableHeight) {
+            if (content.scrollHeight <= availableHeight) {
                 low = mid;
             } else {
                 high = mid;
@@ -42,7 +44,7 @@ export function AutoFitText({
         }
 
         const finalSize = Math.floor(low * 2) / 2;
-        textEl.style.fontSize = `${finalSize}px`;
+        content.style.fontSize = `${finalSize}px`;
         setFontSize(finalSize);
     }, [minFontSize, maxFontSize]);
 
@@ -53,7 +55,6 @@ export function AutoFitText({
         const observer = new ResizeObserver(() => fitText());
         observer.observe(container);
 
-        // Re-fit after custom fonts load (measurement may differ with fallback font)
         document.fonts.ready.then(() => fitText());
 
         return () => observer.disconnect();
@@ -68,16 +69,18 @@ export function AutoFitText({
             ref={containerRef}
             style={{ width: '100%', height: '100%', overflow: 'hidden' }}
         >
-            <p
-                ref={textRef}
-                className={className}
+            <div
+                ref={contentRef}
                 style={{
                     opacity: fontSize === null ? 0 : 1,
                     transition: 'opacity 0.2s ease-in',
                 }}
             >
-                {text}
-            </p>
+                <p className={className}>
+                    {text}
+                </p>
+                {footer}
+            </div>
         </div>
     );
 }
