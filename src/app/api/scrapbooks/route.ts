@@ -48,6 +48,13 @@ export async function GET(req: Request) {
         const url = new URL(req.url);
         const code = url.searchParams.get('code');
 
+        if (!code) {
+            return NextResponse.json(
+                { error: 'Missing code parameter' },
+                { status: 400 }
+            );
+        }
+
         const { data, error } = await supabase
             .from('scrapbooks')
             .select('*, photos(*)')
@@ -72,6 +79,13 @@ export async function DELETE(req: Request) {
         const supabase = await createClient();
         const url = new URL(req.url);
         const code = url.searchParams.get('code');
+
+        if (!code) {
+            return NextResponse.json(
+                { error: 'Missing code parameter' },
+                { status: 400 }
+            );
+        }
 
         const { error } = await supabase
             .from('scrapbooks')

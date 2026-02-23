@@ -50,7 +50,7 @@ async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
             url: publicUrl,
             order: index,
             caption: draft.captions[index],
-            taken_at: draft.metadata[index]?.takenAt,
+            taken_at: draft.metadata[index]?.takenAt?.toISOString() ?? null,
             location: draft.metadata[index]?.location,
         });
     });

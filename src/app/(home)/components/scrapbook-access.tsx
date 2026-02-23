@@ -26,7 +26,7 @@ export function ScrapbookAccess() {
                 .from('scrapbooks')
                 .select('code')
                 .eq('code', password)
-                .single();
+                .single<{ code: string }>();
 
             if (error || !data) {
                 toast.error("This scrapbook doesn't exist", {

@@ -37,6 +37,7 @@ export interface Database {
           is_published?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       photos: {
         Row: {
@@ -69,7 +70,28 @@ export interface Database {
           taken_at?: string | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "photos_scrapbook_id_fkey"
+            columns: ["scrapbook_id"]
+            isOneToOne: false
+            referencedRelation: "scrapbooks"
+            referencedColumns: ["id"]
+          }
+        ]
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
