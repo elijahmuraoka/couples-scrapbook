@@ -10,6 +10,7 @@ import {
     CardDescription,
 } from '@/components/ui/card';
 import EXIF from 'exif-js';
+import { useScrapbookStore, generatePhotoId } from '@/store/useScrapbookStore';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
 
@@ -34,6 +35,8 @@ export function PhotoUpload({
     setMetadata,
     setCaptions,
 }: PhotoUploadProps) {
+    const { photoIds, setPhotoIds } = useScrapbookStore();
+
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
 
@@ -58,6 +61,9 @@ export function PhotoUpload({
         // Create object URLs for previews
         const newPreviews = validFiles.map((file) => URL.createObjectURL(file));
 
+        // Generate stable unique IDs for each new photo
+        const newIds = validFiles.map(() => generatePhotoId());
+
         // Extract metadata and update state
         const photosWithMetadata = await Promise.all(
             validFiles.map(async (file) => {
@@ -76,6 +82,7 @@ export function PhotoUpload({
             ...photosWithMetadata.map((p) => p.metadata),
         ]);
         setCaptions([...captions, ...Array(validFiles.length).fill('')]);
+        setPhotoIds([...photoIds, ...newIds]);
 
         // Reset input
         if (e.target) {

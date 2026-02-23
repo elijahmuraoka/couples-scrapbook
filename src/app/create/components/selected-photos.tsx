@@ -39,6 +39,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { useScrapbookStore } from '@/store/useScrapbookStore';
 
 interface SelectedPhotosProps {
     selectedFiles: File[];
@@ -277,6 +278,8 @@ export function SelectedPhotos({
     metadata,
     setMetadata,
 }: SelectedPhotosProps) {
+    const { photoIds, setPhotoIds } = useScrapbookStore();
+
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -299,18 +302,22 @@ export function SelectedPhotos({
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
-            const oldIndex = parseInt(active.id.split('-')[1]);
-            const newIndex = parseInt(over.id.split('-')[1]);
+            const oldIndex = photoIds.indexOf(active.id as string);
+            const newIndex = photoIds.indexOf(over.id as string);
+
+            if (oldIndex === -1 || newIndex === -1) return;
 
             const newFiles = arrayMove([...selectedFiles], oldIndex, newIndex);
             const newPreviews = arrayMove([...previews], oldIndex, newIndex);
             const newCaptions = arrayMove([...captions], oldIndex, newIndex);
             const newMetadata = arrayMove([...metadata], oldIndex, newIndex);
+            const newIds = arrayMove([...photoIds], oldIndex, newIndex);
 
             setSelectedFiles(newFiles);
             setPreviews(newPreviews);
             setCaptions(newCaptions);
             setMetadata(newMetadata);
+            setPhotoIds(newIds);
         }
     };
 
@@ -322,16 +329,19 @@ export function SelectedPhotos({
         const newPreviews = [...previews];
         const newCaptions = [...captions];
         const newMetadata = [...metadata];
+        const newIds = [...photoIds];
 
         newFiles.splice(index, 1);
         newPreviews.splice(index, 1);
         newCaptions.splice(index, 1);
         newMetadata.splice(index, 1);
+        newIds.splice(index, 1);
 
         setSelectedFiles(newFiles);
         setPreviews(newPreviews);
         setCaptions(newCaptions);
         setMetadata(newMetadata);
+        setPhotoIds(newIds);
     };
 
     return (
@@ -363,14 +373,14 @@ export function SelectedPhotos({
                     onDragEnd={handleDragEnd}
                 >
                     <SortableContext
-                        items={previews.map((_, i) => `photo-${i}`)}
+                        items={photoIds}
                         strategy={verticalListSortingStrategy}
                     >
                         <div className="space-y-2">
                             {previews.map((preview, index) => (
                                 <SortablePhotoItem
-                                    key={`photo-${index}`}
-                                    id={`photo-${index}`}
+                                    key={photoIds[index]}
+                                    id={photoIds[index]}
                                     index={index}
                                     preview={preview}
                                     caption={captions[index] || ''}
@@ -387,31 +397,23 @@ export function SelectedPhotos({
                     </SortableContext>
 
                     <DragOverlay>
-                        {activeId ? (
-                            <div className="bg-white rounded-lg shadow-xl ring-2 ring-pink-200 opacity-80">
-                                <SortablePhotoItem
-                                    id={activeId}
-                                    index={parseInt(activeId.split('-')[1])}
-                                    preview={
-                                        previews[
-                                            parseInt(activeId.split('-')[1])
-                                        ]
-                                    }
-                                    caption={
-                                        captions[
-                                            parseInt(activeId.split('-')[1])
-                                        ] || ''
-                                    }
-                                    onRemove={() => {}}
-                                    onCaptionChange={() => {}}
-                                    metadata={
-                                        metadata[
-                                            parseInt(activeId.split('-')[1])
-                                        ]
-                                    }
-                                />
-                            </div>
-                        ) : null}
+                        {activeId ? (() => {
+                            const overlayIndex = photoIds.indexOf(activeId);
+                            if (overlayIndex === -1) return null;
+                            return (
+                                <div className="bg-white rounded-lg shadow-xl ring-2 ring-pink-200 opacity-80">
+                                    <SortablePhotoItem
+                                        id={activeId}
+                                        index={overlayIndex}
+                                        preview={previews[overlayIndex]}
+                                        caption={captions[overlayIndex] || ''}
+                                        onRemove={() => {}}
+                                        onCaptionChange={() => {}}
+                                        metadata={metadata[overlayIndex]}
+                                    />
+                                </div>
+                            );
+                        })() : null}
                     </DragOverlay>
                 </DndContext>
             </CardContent>
