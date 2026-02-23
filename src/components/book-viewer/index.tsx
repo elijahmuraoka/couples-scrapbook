@@ -166,7 +166,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                             maxFontSize={22}
                             footer={senderName ? (
                                 <p className="font-handwriting text-center pt-4 md:pt-6 pb-4 md:pb-8 px-4 md:px-8 text-gray-800" style={{ fontSize: '1.15em' }}>
-                                    Love {senderName}
+                                    Love,<br />{senderName}
                                 </p>
                             ) : undefined}
                         />
