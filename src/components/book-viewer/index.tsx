@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
 import HTMLFlipBook from 'react-pageflip';
@@ -56,7 +56,7 @@ function normalizeBookData(
 }
 
 export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
-    const { title, note, photos } = normalizeBookData(data);
+    const { title, note, photos } = useMemo(() => normalizeBookData(data), [data]);
     const [currentPage, setCurrentPage] = useState(0);
     const [orientations, setOrientations] = useState<
         Array<'vertical' | 'horizontal'>
