@@ -158,7 +158,7 @@ export default function PreviewPage() {
 
                 {/* Content Area */}
                 <div className="space-y-6 w-full">
-                    <div className="flex flex-col md:flex-row gap-4 items-center md:justify-between pb-6 border-b w-full">
+                    <div className="flex flex-col md:flex-row gap-4 items-start md:items-center md:justify-between pb-6 border-b w-full">
                         <div className="flex items-center gap-4">
                             <div>
                                 <h1 className="text-4xl font-serif italic text-gray-900">
@@ -169,7 +169,7 @@ export default function PreviewPage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 w-full md:w-auto">
                             {draft.selectedSongId && (
                                 <MusicPlayer
                                     songId={draft.selectedSongId}

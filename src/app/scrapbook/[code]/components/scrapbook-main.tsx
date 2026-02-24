@@ -14,7 +14,7 @@ export default function ScrapbookMain({ scrapbook }: { scrapbook: Scrapbook }) {
 
     return (
         <div className="flex flex-col w-full items-center justify-center space-y-8">
-            <div className="flex flex-col md:flex-row items-center md:justify-between justify-center gap-4 pb-6 border-b w-full">
+            <div className="flex flex-col md:flex-row items-start md:items-center md:justify-between gap-4 pb-6 border-b w-full">
                 <div className="flex items-center gap-4">
                     <div>
                         <h1 className="text-4xl font-serif italic text-gray-900">
@@ -25,7 +25,7 @@ export default function ScrapbookMain({ scrapbook }: { scrapbook: Scrapbook }) {
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full md:w-auto">
                     {scrapbook.music_id && (
                         <MusicPlayer
                             songId={scrapbook.music_id}
