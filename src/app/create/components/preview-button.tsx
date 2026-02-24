@@ -14,7 +14,8 @@ export function PreviewButton({ onClick, isLoading }: PreviewButtonProps) {
             <Button
                 onClick={onClick}
                 disabled={isLoading}
-                className="px-8 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
+                size="lg"
+                className="px-10 py-3 h-auto text-base bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
             >
                 {isLoading ? 'Loading Preview...' : 'Preview Scrapbook'}
             </Button>

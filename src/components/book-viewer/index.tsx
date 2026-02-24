@@ -304,7 +304,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
 
     return (
         <div className="pb-8">
-            <div className="md:aspect-[3/2] relative bg-white rounded-lg shadow-xl overflow-hidden min-h-[300px] md:min-h-[600px]">
+            <div className="md:aspect-[3/2] relative bg-white rounded-lg shadow-xl overflow-hidden min-h-[60vh] md:min-h-[600px]">
                 {/* Phase 3: Pulsing heart instead of generic spinner — on-brand loading state */}
                 {isLoading && (
                     <div className="absolute inset-0 z-50 bg-white flex items-center justify-center">
