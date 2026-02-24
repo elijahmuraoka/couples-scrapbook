@@ -159,7 +159,6 @@ export default function PreviewPage() {
                 {/* Content Area */}
                 <div className="space-y-6 w-full">
                     <div className="flex flex-col md:flex-row gap-4 items-center md:justify-between pb-6 border-b w-full">
-                        {/* Phase 2: Lighter header — no icon box for content frames (vs form sections) */}
                         <div className="flex items-center gap-4">
                             <div>
                                 <h1 className="text-4xl font-serif italic text-gray-900">
@@ -169,22 +168,24 @@ export default function PreviewPage() {
                                     Review your scrapbook before publishing
                                 </p>
                             </div>
+                        </div>
+                        <div className="flex items-center gap-3">
                             {draft.selectedSongId && (
                                 <MusicPlayer
                                     songId={draft.selectedSongId}
                                     autoPlay={true}
                                 />
                             )}
+                            <Button
+                                onClick={handlePublish}
+                                disabled={isPublishing}
+                                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+                            >
+                                {isPublishing
+                                    ? 'Publishing...'
+                                    : 'Publish & Share'}
+                            </Button>
                         </div>
-                        <Button
-                            onClick={handlePublish}
-                            disabled={isPublishing}
-                            className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full md:w-auto"
-                        >
-                            {isPublishing
-                                ? 'Publishing...'
-                                : 'Publish & Share'}
-                        </Button>
                     </div>
 
                     <BookViewer data={draft} />

@@ -347,9 +347,13 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 </HTMLFlipBook>
             </div>
 
+            {/* Dot navigation: pages.length - 1 because react-pageflip with
+                showCover={true} treats the last page (closing cover) as a back cover
+                that doesn't get its own flip index. The onFlip callback maxes out
+                at pages.length - 2, so the final dot would never activate. */}
             {showNavigation && (
                 <div className="flex items-center justify-center gap-1.5 mt-6">
-                    {Array.from({ length: pages.length }).map((_, i) => (
+                    {Array.from({ length: pages.length - 1 }).map((_, i) => (
                         <div
                             key={i}
                             className={`rounded-full transition-all duration-300 ${
