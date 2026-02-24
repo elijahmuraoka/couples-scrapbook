@@ -66,7 +66,10 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
     >(new Array(photos.length).fill('horizontal'));
     const router = useRouter();
     const pathname = usePathname();
-    const [isLoading, setIsLoading] = useState(true);
+    // Skip loading state for blob/data URLs (preview page) — they load instantly
+    // and showing the loading heart causes a visible flash.
+    const hasBlobUrls = photos.length > 0 && photos[0].url.startsWith('blob:');
+    const [isLoading, setIsLoading] = useState(!hasBlobUrls);
 
     // Only redirect if we're not in preview and have no photos
     useEffect(() => {
@@ -76,9 +79,9 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
         }
     }, [photos, router, pathname]);
 
-    // Preload all images before showing the book
+    // Preload all images before showing the book (skip for blob URLs)
     useEffect(() => {
-        if (photos.length === 0) return;
+        if (photos.length === 0 || hasBlobUrls) return;
 
         let cancelled = false;
 
@@ -104,7 +107,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
 
         preload();
         return () => { cancelled = true; };
-    }, [photos]);
+    }, [photos, hasBlobUrls]);
 
     // Return null instead of loading state
     if (!photos || photos.length === 0) {
@@ -165,8 +168,8 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                             minFontSize={6}
                             maxFontSize={22}
                             footer={senderName ? (
-                                <p className="font-handwriting text-center pt-4 md:pt-6 pb-4 md:pb-8 px-4 md:px-8 text-gray-800" style={{ fontSize: '1.15em' }}>
-                                    Love,<br />{senderName}
+                                <p className="font-handwriting text-center pt-4 md:pt-6 pb-4 md:pb-8 px-4 md:px-8 text-gray-500" style={{ fontSize: '0.85em' }}>
+                                    Love, {senderName}
                                 </p>
                             ) : undefined}
                         />
@@ -347,24 +350,47 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 </HTMLFlipBook>
             </div>
 
-            {/* Dot navigation: pages.length - 1 because react-pageflip with
-                showCover={true} treats the last page (closing cover) as a back cover
-                that doesn't get its own flip index. The onFlip callback maxes out
-                at pages.length - 2, so the final dot would never activate. */}
-            {showNavigation && (
-                <div className="flex items-center justify-center gap-1.5 mt-6">
-                    {Array.from({ length: pages.length - 1 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className={`rounded-full transition-all duration-300 ${
-                                currentPage === i
-                                    ? 'w-2 h-2 bg-pink-400'
-                                    : 'w-1.5 h-1.5 bg-gray-300'
-                            }`}
-                        />
-                    ))}
-                </div>
-            )}
+            {/* Dot navigation: react-pageflip with usePortrait reports different
+                page indices depending on viewport. On mobile (portrait/single page),
+                onFlip increments by 1. On desktop (landscape/spread), it jumps by 2.
+                showCover=true means page 0 is the front cover (solo), then pages pair
+                up as spreads, and the last page is the back cover (solo).
+                
+                We derive the number of "views" (flips) and which view is active:
+                - Cover (page 0) = view 0
+                - Desktop spreads: pages 1-2 = view 1, 3-4 = view 2, etc.
+                - Mobile single: each page = one view
+                - Back cover = last view
+                
+                Simplification: use the reported currentPage to derive active dot.
+                Total dots = number of distinct onFlip values the user can land on. */}
+            {showNavigation && (() => {
+                // On mobile (portrait), each page is a flip. On desktop (spread),
+                // cover is solo, then pairs, then back cover solo.
+                // We show dots based on the actual page count and highlight based
+                // on currentPage. The key insight: just track unique stoppable positions.
+                const totalDots = Math.ceil((pages.length) / 2) + (pages.length % 2 === 0 ? 0 : 0);
+                // Simpler: cover=1 dot, then each spread=1 dot, back cover=1 dot
+                // With showCover, positions are: 0, 1, 3, 5, ... (last)
+                // Actually simplest: just use floor(currentPage/2) for spread mapping
+                const activeDot = currentPage === 0 ? 0 : Math.ceil(currentPage / 2);
+                const dotCount = Math.ceil(pages.length / 2);
+                
+                return (
+                    <div className="flex items-center justify-center gap-1.5 mt-6">
+                        {Array.from({ length: dotCount }).map((_, i) => (
+                            <div
+                                key={i}
+                                className={`rounded-full transition-all duration-300 ${
+                                    activeDot === i
+                                        ? 'w-2 h-2 bg-pink-400'
+                                        : 'w-1.5 h-1.5 bg-gray-300'
+                                }`}
+                            />
+                        ))}
+                    </div>
+                );
+            })()}
         </div>
     );
 }
