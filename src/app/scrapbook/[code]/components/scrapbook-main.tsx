@@ -34,7 +34,7 @@ export default function ScrapbookMain({ scrapbook }: { scrapbook: Scrapbook }) {
                     )}
                     <Button
                         onClick={handleShare}
-                        className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+                        className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full md:w-auto"
                     >
                         <Share2 className="w-4 h-4 mr-2" />
                         Share

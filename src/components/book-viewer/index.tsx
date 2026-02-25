@@ -369,10 +369,6 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 // cover is solo, then pairs, then back cover solo.
                 // We show dots based on the actual page count and highlight based
                 // on currentPage. The key insight: just track unique stoppable positions.
-                const totalDots = Math.ceil((pages.length) / 2) + (pages.length % 2 === 0 ? 0 : 0);
-                // Simpler: cover=1 dot, then each spread=1 dot, back cover=1 dot
-                // With showCover, positions are: 0, 1, 3, 5, ... (last)
-                // Actually simplest: just use floor(currentPage/2) for spread mapping
                 const activeDot = currentPage === 0 ? 0 : Math.ceil(currentPage / 2);
                 const dotCount = Math.ceil(pages.length / 2);
                 

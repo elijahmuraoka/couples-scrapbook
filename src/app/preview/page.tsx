@@ -179,7 +179,7 @@ export default function PreviewPage() {
                             <Button
                                 onClick={handlePublish}
                                 disabled={isPublishing}
-                                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+                                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full md:w-auto"
                             >
                                 {isPublishing
                                     ? 'Publishing...'
