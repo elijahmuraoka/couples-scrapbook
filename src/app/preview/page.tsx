@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { BookViewer } from '@/components/book-viewer';
 import { toast } from 'sonner';
-import { ArrowLeft, Eye } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { MusicPlayer } from '@/components/music-player';
 import { ScrapbookDraft } from '@/types/scrapbook';
 import { createClient } from '@/lib/supabase/client';
@@ -144,7 +144,7 @@ export default function PreviewPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-8 md:p-12">
+        <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white px-4 pt-14 pb-8 md:p-12">
             <div className="max-w-4xl mx-auto space-y-6">
                 {/* Top Navigation */}
                 <Button
@@ -158,11 +158,8 @@ export default function PreviewPage() {
 
                 {/* Content Area */}
                 <div className="space-y-6 w-full">
-                    <div className="flex flex-col md:flex-row gap-4 items-center md:justify-between pb-6 border-b w-full">
+                    <div className="flex flex-col md:flex-row gap-4 items-start md:items-center md:justify-between pb-6 border-b w-full">
                         <div className="flex items-center gap-4">
-                            <div className="p-2 bg-pink-50 rounded-xl">
-                                <Eye className="w-8 h-8 text-pink-500" />
-                            </div>
                             <div>
                                 <h1 className="text-4xl font-serif italic text-gray-900">
                                     Preview Your Scrapbook
@@ -172,11 +169,10 @@ export default function PreviewPage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 w-full md:w-auto max-w-[400px]">
+                        <div className="flex items-center gap-3 w-full md:w-auto">
                             {draft.selectedSongId && (
                                 <MusicPlayer
                                     songId={draft.selectedSongId}
-                                    className="bg-white shadow-sm border border-pink-100 rounded-lg"
                                     autoPlay={true}
                                 />
                             )}

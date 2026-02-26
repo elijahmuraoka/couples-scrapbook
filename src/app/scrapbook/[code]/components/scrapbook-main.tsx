@@ -1,6 +1,6 @@
 'use client';
 import { Scrapbook } from '@/types/scrapbook';
-import { BookHeart, Share2 } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MusicPlayer } from '@/components/music-player';
 import { BookViewer } from '@/components/book-viewer';
@@ -14,11 +14,8 @@ export default function ScrapbookMain({ scrapbook }: { scrapbook: Scrapbook }) {
 
     return (
         <div className="flex flex-col w-full items-center justify-center space-y-8">
-            <div className="flex flex-col md:flex-row items-center md:justify-between justify-center gap-4 pb-6 border-b w-full">
+            <div className="flex flex-col md:flex-row items-start md:items-center md:justify-between gap-4 pb-6 border-b w-full">
                 <div className="flex items-center gap-4">
-                    <div className="p-2 bg-pink-50 rounded-xl">
-                        <BookHeart className="w-8 h-8 text-pink-500" />
-                    </div>
                     <div>
                         <h1 className="text-4xl font-serif italic text-gray-900">
                             {scrapbook.title}
@@ -28,11 +25,10 @@ export default function ScrapbookMain({ scrapbook }: { scrapbook: Scrapbook }) {
                         </p>
                     </div>
                 </div>
-                <div className="flex items-center gap-4 w-full max-w-[300px] md:w-auto">
+                <div className="flex items-center gap-3 w-full md:w-auto">
                     {scrapbook.music_id && (
                         <MusicPlayer
                             songId={scrapbook.music_id}
-                            className="bg-white shadow-sm border border-pink-100 rounded-lg"
                             autoPlay={false}
                         />
                     )}
