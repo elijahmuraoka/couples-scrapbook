@@ -7,6 +7,7 @@ export interface ScrapbookDraft {
     captions: string[];
     metadata: Array<{ location?: string; takenAt?: Date }>;
     selectedSongId: string | null;
+    customMusicFile: File | null;
 }
 
 // Scrapbook Type
@@ -17,6 +18,7 @@ export interface Scrapbook {
     note?: string; // Optional
     sender_name?: string; // Optional
     music_id?: string; // Optional
+    custom_music_url?: string; // Optional
     is_published: boolean; // Defaults to false
     created_at: Date; // Auto-generated
     photos: Photo[]; // One-to-many relation

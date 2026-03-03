@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ChangeEvent } from 'react';
 import {
     Card,
     CardHeader,
@@ -9,23 +9,26 @@ import {
     CardContent,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Music2 } from 'lucide-react';
+import { Play, Pause, Music2, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MUSIC_LIBRARY } from '@/lib/music-library';
 
 interface MusicSelectorProps {
     selectedSongId: string | null;
+    customMusicFile: File | null;
     onSelect: (songId: string | null) => void;
+    onCustomFile: (file: File | null) => void;
 }
 
 export function MusicSelector({
     selectedSongId,
+    customMusicFile,
     onSelect,
+    onCustomFile,
 }: MusicSelectorProps) {
     const [playingSongId, setPlayingSongId] = useState<string | null>(null);
     const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
-    // Initialize audio on client side only
     useEffect(() => {
         setAudio(new Audio());
     }, []);
@@ -36,17 +39,29 @@ export function MusicSelector({
         if (playingSongId === songId) {
             audio.pause();
             setPlayingSongId(null);
-        } else {
-            if (playingSongId) {
-                audio.pause();
-            }
-            audio.src = `/music/${songId}.mp3`;
-            audio.play();
-            setPlayingSongId(songId);
+            return;
         }
+
+        if (playingSongId) {
+            audio.pause();
+        }
+
+        audio.src = `/music/${songId}.mp3`;
+        audio.play();
+        setPlayingSongId(songId);
     };
 
-    // Clean up audio on unmount
+    const handleCustomFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] ?? null;
+        if (!file) {
+            onCustomFile(null);
+            return;
+        }
+
+        onSelect(null);
+        onCustomFile(file);
+    };
+
     useEffect(() => {
         return () => {
             if (audio) {
@@ -84,7 +99,10 @@ export function MusicSelector({
                                 'bg-pink-50 ring-1 ring-pink-200',
                             playingSongId === song.id && 'bg-pink-50/80'
                         )}
-                        onClick={() => onSelect(song.id)}
+                        onClick={() => {
+                            onCustomFile(null);
+                            onSelect(song.id);
+                        }}
                     >
                         <div className="flex items-center gap-4">
                             <Button
@@ -122,6 +140,24 @@ export function MusicSelector({
                         )}
                     </div>
                 ))}
+
+                <div className="mt-4 border-2 border-dashed border-pink-200 rounded-lg p-4 bg-pink-50/30">
+                    <div className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
+                        <Upload className="h-4 w-4 text-pink-500" />
+                        Or upload your own
+                    </div>
+                    <input
+                        type="file"
+                        accept="audio/mpeg,audio/mp3"
+                        onChange={handleCustomFileChange}
+                        className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-pink-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-pink-700 hover:file:bg-pink-200"
+                    />
+                    {customMusicFile && (
+                        <p className="mt-2 text-xs text-pink-700">
+                            Selected: {customMusicFile.name}
+                        </p>
+                    )}
+                </div>
             </CardContent>
         </Card>
     );

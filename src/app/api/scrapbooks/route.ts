@@ -34,6 +34,7 @@ function validateBody(body: unknown): {
         note: string | null;
         senderName: string | null;
         selectedSongId: string | null;
+        customMusicUrl: string | null;
     };
 } {
     if (typeof body !== 'object' || body === null) {
@@ -87,6 +88,18 @@ function validateBody(body: unknown): {
         return { ok: false, error: 'Song ID too long' };
     }
 
+    // customMusicUrl — optional string URL, max 1000 chars
+    const customMusicUrl =
+        b.customMusicUrl === null || b.customMusicUrl === undefined
+            ? null
+            : b.customMusicUrl;
+    if (customMusicUrl !== null && typeof customMusicUrl !== 'string') {
+        return { ok: false, error: 'Custom music URL must be a string or null' };
+    }
+    if (typeof customMusicUrl === 'string' && customMusicUrl.length > 1000) {
+        return { ok: false, error: 'Custom music URL too long' };
+    }
+
     return {
         ok: true,
         data: {
@@ -94,6 +107,7 @@ function validateBody(body: unknown): {
             note: note as string | null,
             senderName: senderName as string | null,
             selectedSongId: selectedSongId as string | null,
+            customMusicUrl: customMusicUrl as string | null,
         },
     };
 }
@@ -128,7 +142,7 @@ export async function POST(req: Request) {
             );
         }
 
-        const { title, note, senderName, selectedSongId } = validation.data!;
+        const { title, note, senderName, selectedSongId, customMusicUrl } = validation.data!;
 
         const supabase = await createClient();
         const code = nanoid(10);
@@ -141,6 +155,7 @@ export async function POST(req: Request) {
                 sender_name: senderName,
                 code,
                 music_id: selectedSongId,
+                custom_music_url: customMusicUrl,
                 is_published: true,
             })
             .select()

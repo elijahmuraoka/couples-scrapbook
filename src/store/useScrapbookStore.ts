@@ -19,6 +19,7 @@ const initialState: ScrapbookDraft = {
     captions: [],
     metadata: [],
     selectedSongId: null,
+    customMusicFile: null,
 };
 
 let _idCounter = 0;

@@ -26,9 +26,10 @@ export default function ScrapbookMain({ scrapbook }: { scrapbook: Scrapbook }) {
                     </div>
                 </div>
                 <div className="flex items-center gap-3 w-full md:w-auto">
-                    {scrapbook.music_id && (
+                    {(scrapbook.music_id || scrapbook.custom_music_url) && (
                         <MusicPlayer
                             songId={scrapbook.music_id}
+                            src={scrapbook.custom_music_url}
                             autoPlay={false}
                         />
                     )}

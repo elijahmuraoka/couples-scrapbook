@@ -27,6 +27,7 @@ async function fetchScrapbook(code: string): Promise<{
             note: data.note ?? undefined,
             sender_name: data.sender_name ?? undefined,
             music_id: data.music_id ?? undefined,
+            custom_music_url: data.custom_music_url ?? undefined,
             is_published: data.is_published,
             created_at: new Date(data.created_at),
             photos: ((data as Record<string, unknown>).photos as Array<Record<string, unknown>>)

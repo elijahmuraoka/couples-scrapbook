@@ -119,8 +119,12 @@ export function ScrapbookForm() {
                 />
                 <MusicSelector
                     selectedSongId={draft.selectedSongId}
+                    customMusicFile={draft.customMusicFile}
                     onSelect={(songId) =>
                         updateDraft({ selectedSongId: songId })
+                    }
+                    onCustomFile={(file) =>
+                        updateDraft({ customMusicFile: file })
                     }
                 />
                 <PhotoUpload
