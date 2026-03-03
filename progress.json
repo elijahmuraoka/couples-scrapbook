@@ -1,5 +1,5 @@
 {
-  "currentPhase": 5,
+  "currentPhase": 6,
   "maxPhase": 6,
   "phases": {
     "1": {
@@ -35,7 +35,7 @@
     },
     "4": {
       "status": "done",
-      "description": "Custom audio file upload feature \u2014 creator drops their own MP3",
+      "description": "Custom audio file upload feature — creator drops their own MP3",
       "completed": [
         "Migration 003_custom_music.sql",
         "Add custom_music_url to Supabase and Scrapbook types",
@@ -52,23 +52,24 @@
       "commit": "5cb957b"
     },
     "5": {
-      "status": "pending",
-      "description": "Integration check \u2014 build, lint, verify all fixes, browser test mobile + desktop",
-      "completed": [],
-      "remaining": [
-        "pnpm build clean",
-        "pnpm lint clean",
-        "Verify all 10 fixes applied",
-        "Browser test: desktop spread view",
-        "Browser test: mobile portrait view",
-        "Browser test: existing scrapbook loads",
-        "Browser test: font renders correctly",
-        "Fix any issues found"
-      ]
+      "status": "done",
+      "description": "Integration check — build, lint, verify all fixes, browser test mobile + desktop",
+      "completed": [
+        "pnpm build clean (0 errors)",
+        "pnpm lint clean (0 errors, warnings only)",
+        "Verified KNOWN-ISSUES checklist via grep checks",
+        "Browser test desktop 1280x800: home/create/scrapbook viewer verified spread mode",
+        "Browser test mobile 390x844: create/scrapbook viewer verified portrait mode",
+        "Verified existing scrapbook route loads and handwriting font renders",
+        "Captured desktop and mobile screenshots for validation"
+      ],
+      "remaining": [],
+      "completedAt": "2026-03-03T13:05:15-05:00",
+      "commit": "d898395"
     },
     "6": {
       "status": "pending",
-      "description": "Merge design-audit \u2192 main, final build, session sync",
+      "description": "Merge design-audit → main, final build, session sync",
       "completed": [],
       "remaining": [
         "Final build on design-audit",
@@ -79,8 +80,8 @@
       ]
     }
   },
-  "lastRunResult": "Phase 4 completed: implemented custom music upload end-to-end with new custom_music_url column migration, draft/store typing for custom files, upload UI in create flow, guarded MusicPlayer support for preset or direct URL audio, preview upload to Supabase Storage (music/ prefix), POST payload + API validation/storage for customMusicUrl, and scrapbook viewer playback via src fallback. Build/lint are clean (warnings only). Progress advanced to phase 5.",
-  "lastRunAt": "2026-03-03T12:30:00-05:00",
+  "lastRunResult": "Phase 5 completed: ran pnpm build and pnpm lint (both clean; warnings only), verified regression checklist (font import, music loop, DELETE endpoint, binary upload path, responsive usePortrait, dead-state removal, custom-music migration, no Buffer client imports), and completed browser validation on desktop (1280x800) + mobile (390x844). Confirmed viewer spread on desktop, portrait on mobile, and scrapbook route load success.",
+  "lastRunAt": "2026-03-03T13:05:15-05:00",
   "blockers": [],
   "consecutiveBlockerRuns": 0,
   "metrics": {
