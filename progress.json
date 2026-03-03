@@ -1,5 +1,5 @@
 {
-  "currentPhase": 3,
+  "currentPhase": 4,
   "maxPhase": 6,
   "phases": {
     "1": {
@@ -21,15 +21,17 @@
       "commit": "9bbdf7b"
     },
     "3": {
-      "status": "pending",
+      "status": "done",
       "description": "Remove dead orientations state + fix isLoading + responsive portrait/spread (M5, M1, H3)",
-      "completed": [],
-      "remaining": [
+      "completed": [
         "Remove orientations state from book-viewer",
         "Fix isLoading in scrapbook-access",
         "Add isPortrait responsive logic",
         "Update dot navigation math for spread mode"
-      ]
+      ],
+      "remaining": [],
+      "completedAt": "2026-03-03T12:01:34-05:00",
+      "commit": "2393608"
     },
     "4": {
       "status": "pending",
@@ -75,12 +77,12 @@
       ]
     }
   },
-  "lastRunResult": "Phase 2 confirmed complete: DELETE rollback endpoint implemented in src/app/api/scrapbooks/route.ts, binary Uint8Array photo upload implemented in src/app/preview/page.tsx, and supabase/migrations/002_delete_policy.sql added. Build and lint rerun clean (warnings only). Progress advanced to phase 3.",
-  "lastRunAt": "2026-03-03T11:31:00-05:00",
+  "lastRunResult": "Phase 3 completed: removed dead orientations state and onLoad orientation bookkeeping from src/components/book-viewer/index.tsx (M5), fixed stuck \"Getting Ready...\" behavior by removing manual isLoading toggle in src/app/(home)/components/scrapbook-access.tsx (M1), and implemented responsive pageflip mode with matchMedia-driven isPortrait plus corrected dot math for portrait vs spread navigation in book-viewer (H3). Build and lint are clean (warnings only). Progress advanced to phase 4.",
+  "lastRunAt": "2026-03-03T12:01:34-05:00",
   "blockers": [],
   "consecutiveBlockerRuns": 0,
   "metrics": {
-    "fixesApplied": 5,
+    "fixesApplied": 8,
     "fixesTotal": 10,
     "featuresApplied": 0,
     "featuresTotal": 1,
