@@ -61,15 +61,13 @@ function normalizeBookData(
 export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
     const { title, note, senderName, photos } = useMemo(() => normalizeBookData(data), [data]);
     const [currentPage, setCurrentPage] = useState(0);
-    const [orientations, setOrientations] = useState<
-        Array<'vertical' | 'horizontal'>
-    >(new Array(photos.length).fill('horizontal'));
     const router = useRouter();
     const pathname = usePathname();
     // Skip loading state for blob/data URLs (preview page) — they load instantly
     // and showing the loading heart causes a visible flash.
     const hasBlobUrls = photos.length > 0 && photos[0].url.startsWith('blob:');
     const [isLoading, setIsLoading] = useState(!hasBlobUrls);
+    const [isPortrait, setIsPortrait] = useState(true);
 
     // Only redirect if we're not in preview and have no photos
     useEffect(() => {
@@ -78,6 +76,18 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
             router.push('/');
         }
     }, [photos, router, pathname]);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(min-width: 768px)');
+        const updatePortrait = (matches: boolean) => setIsPortrait(!matches);
+
+        updatePortrait(mediaQuery.matches);
+
+        const onChange = (event: MediaQueryListEvent) => updatePortrait(event.matches);
+        mediaQuery.addEventListener('change', onChange);
+
+        return () => mediaQuery.removeEventListener('change', onChange);
+    }, []);
 
     // Preload all images before showing the book (skip for blob URLs)
     useEffect(() => {
@@ -219,16 +229,6 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                                 width={600}
                                 height={800}
                                 className="w-full h-full object-contain"
-                                onLoad={(e) => {
-                                    const img = e.target as HTMLImageElement;
-                                    const isVertical =
-                                        img.naturalHeight > img.naturalWidth;
-                                    const newOrientations = [...orientations];
-                                    newOrientations[index] = isVertical
-                                        ? 'vertical'
-                                        : 'horizontal';
-                                    setOrientations(newOrientations);
-                                }}
                             />
                         </div>
                     </div>
@@ -338,7 +338,7 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                     startPage={0}
                     drawShadow={true}
                     flippingTime={1000}
-                    usePortrait={true}
+                    usePortrait={isPortrait}
                     autoSize={true}
                     mobileScrollSupport={true}
                     swipeDistance={30}
@@ -369,8 +369,14 @@ export function BookViewer({ data, showNavigation = true }: BookViewerProps) {
                 // cover is solo, then pairs, then back cover solo.
                 // We show dots based on the actual page count and highlight based
                 // on currentPage. The key insight: just track unique stoppable positions.
-                const activeDot = currentPage === 0 ? 0 : Math.ceil(currentPage / 2);
-                const dotCount = Math.ceil(pages.length / 2);
+                const activeDot = isPortrait
+                    ? currentPage
+                    : currentPage === 0
+                      ? 0
+                      : Math.ceil(currentPage / 2);
+                const dotCount = isPortrait
+                    ? pages.length
+                    : Math.ceil(pages.length / 2);
                 
                 return (
                     <div className="flex items-center justify-center gap-1.5 mt-6">
