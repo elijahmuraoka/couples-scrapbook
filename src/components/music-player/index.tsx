@@ -21,6 +21,7 @@ export function MusicPlayer({
 
     useEffect(() => {
         audioRef.current = new Audio(`/music/${songId}.mp3`);
+        audioRef.current.loop = true;
 
         if (autoPlay) {
             // Small delay to ensure audio is loaded
@@ -56,20 +57,6 @@ export function MusicPlayer({
         }
         setIsPlaying(!isPlaying);
     };
-
-    // Handle song end
-    useEffect(() => {
-        if (!audioRef.current) return;
-
-        const handleEnded = () => setIsPlaying(false);
-        audioRef.current.addEventListener('ended', handleEnded);
-
-        return () => {
-            if (audioRef.current) {
-                audioRef.current.removeEventListener('ended', handleEnded);
-            }
-        };
-    }, []);
 
     return (
         <Button

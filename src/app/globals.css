@@ -72,7 +72,7 @@
     }
 
     .font-handwriting {
-        font-family: 'Petit Formal Script', cursive;
+        font-family: var(--font-handwriting), 'Petit Formal Script', cursive;
     }
 
     .bg-cream-paper {
