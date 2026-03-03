@@ -23,7 +23,8 @@
 
 ## Supabase Notes
 
-- Migrations 002 and 003 create SQL files only. They must be applied to the live Supabase project separately via `supabase db push`. The cron should NOT run `supabase db push` — Elijah does that manually.
+- Migrations are applied automatically via `node scripts/run-migrations.js` which connects directly to the DB using `SUPABASE_DB_URL` from `.env`. The script is idempotent — already-applied migrations are safely skipped ("already exists" errors).
+- `pg` is a devDependency used only by the migration runner script.
 - The `photos` storage bucket is used for both photos AND custom music files (music/ prefix).
 
 ## Testing Checklist (for audit cron)

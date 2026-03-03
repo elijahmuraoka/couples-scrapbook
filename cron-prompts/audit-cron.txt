@@ -98,4 +98,4 @@ Send status to BOTH:
 If clean: "✅ Scrapbook audit pass — Phase [N] verified. Build clean. [fixesApplied]/[fixesTotal] fixes, [featuresApplied]/[featuresTotal] features."
 If fixed: "🔧 Scrapbook audit — fixed [N] issues: [list]. Build clean now. Commit: [hash]"
 If blocked: "⚠️ Scrapbook BLOCKED — [blocker description]. Needs Elijah's input."
-If complete: "🎉 Scrapbook ALL DONE — [N] phases complete. All fixes + custom music. Build clean on main. Pending: Elijah applies 3 SQL statements in Supabase dashboard + Vercel deploy."
+If complete: "🎉 Scrapbook ALL DONE — [N] phases complete. All fixes + custom music. Build clean on main. Migrations applied. Deployed to Vercel. Live URL: [url]"

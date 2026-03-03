@@ -24,7 +24,7 @@ Read currentPhase from progress.json. Execute ONLY that phase's instructions fro
 - If currentPhase == 3: Cleanup + responsive (M5, M1, H3). Follow Phase 3 in plan.md exactly.
 - If currentPhase == 4: Custom music upload. Follow Phase 4 in plan.md exactly. This is the largest phase — read ALL 10 files listed before writing any code.
 - If currentPhase == 5: Integration check + browser testing. Follow Phase 5 in plan.md. Start dev server, use browser tool to check pages at desktop (1280x800) and mobile (390x844) viewports.
-- If currentPhase == 6: Merge to main. Follow Phase 6 in plan.md exactly.
+- If currentPhase == 6: Merge to main, run migrations, push to deploy, send live URL. Follow Phase 6 in plan.md exactly. Key steps: merge design-audit → main, run `node scripts/run-migrations.js` (applies all pending SQL to Supabase), `git push origin main` (triggers Vercel auto-deploy), wait 90s, get live URL from `vercel ls --prod | head -1`, send it to Elijah.
 - If currentPhase > 6: All done. Update progress.json, send final completion message, exit.
 
 AFTER EACH PHASE (non-negotiable):
