@@ -15,27 +15,21 @@ import confetti from 'canvas-confetti';
 async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
     const supabase = createClient();
     const photoPromises = draft.previews.map(async (blobUrl, index) => {
-        // Convert blob URL to base64
+        // Fetch blob directly as binary — no base64 needed
         const response = await fetch(blobUrl);
         const blob = await response.blob();
-        const base64Data = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result as string;
-                // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
-                const base64 = base64String.split(',')[1];
-                resolve(base64);
-            };
-            reader.readAsDataURL(blob);
-        });
+        const arrayBuffer = await blob.arrayBuffer();
+        const fileData = new Uint8Array(arrayBuffer);
 
-        const fileData = Buffer.from(base64Data, 'base64');
-        const fileName = `${scrapbookId}/${Date.now()}-${index}.jpg`;
+        // Use actual MIME type from the original File (not hardcoded jpeg)
+        const contentType = draft.selectedFiles[index]?.type || 'image/jpeg';
+        const ext = contentType.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
+        const fileName = `${scrapbookId}/${index}-${Date.now()}.${ext}`;
 
         const { error: uploadError } = await supabase.storage
             .from('photos')
             .upload(fileName, fileData, {
-                contentType: 'image/jpeg',
+                contentType,
                 cacheControl: '3600',
             });
 

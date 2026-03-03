@@ -160,3 +160,37 @@ export async function POST(req: Request) {
         );
     }
 }
+
+// ---------------------------------------------------------------------------
+// DELETE /api/scrapbooks — Delete a scrapbook by code (rollback cleanup)
+// ---------------------------------------------------------------------------
+export async function DELETE(req: Request) {
+    try {
+        const url = new URL(req.url);
+        const code = url.searchParams.get('code');
+        if (!code) {
+            return Response.json({ error: 'Code required' }, { status: 400 });
+        }
+
+        const supabase = await createClient();
+
+        const { data: scrapbook } = await supabase
+            .from('scrapbooks')
+            .select('id')
+            .eq('code', code)
+            .single();
+
+        if (!scrapbook) {
+            return Response.json({ ok: true }); // Already gone, that's fine
+        }
+
+        // Delete photos first (FK constraint), then scrapbook
+        await supabase.from('photos').delete().eq('scrapbook_id', scrapbook.id);
+        await supabase.from('scrapbooks').delete().eq('id', scrapbook.id);
+
+        return Response.json({ ok: true });
+    } catch (error) {
+        console.error('Delete error:', error);
+        return Response.json({ error: 'Failed to delete scrapbook' }, { status: 500 });
+    }
+}
