@@ -1,0 +1,64 @@
+TASK: Fix 2 critical bugs in the couples-scrapbook app — load the Petit Formal Script handwriting font and enable music looping.
+
+FIRST: Read these files:
+1. /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/context.md — project context + exact bug details
+2. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/layout.tsx — current font setup
+3. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/components/music-player/index.tsx — music player
+4. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/globals.css — .font-handwriting CSS rule
+
+INSTRUCTIONS:
+
+All work happens in /Users/bob/.openclaw/workspace/repos/couples-scrapbook on the design-audit branch. Confirm you're on design-audit before touching any files: run `git branch` in that directory.
+
+--- Fix 1: Load Petit Formal Script font (Bug C1) ---
+
+The .font-handwriting CSS class references 'Petit Formal Script' but it is NEVER imported. Every handwriting element (notes, captions, signature, cover subtitle) renders in a system fallback font. Biggest visual bug.
+
+1. Open src/app/layout.tsx
+2. Replace the font import section with:
+   import { Inter, Petit_Formal_Script } from 'next/font/google';
+   const inter = Inter({ subsets: ['latin'] });
+   const petitFormal = Petit_Formal_Script({
+       subsets: ['latin'],
+       weight: '400',
+       variable: '--font-handwriting',
+   });
+
+3. The <html> tag currently has no className. Update it to:
+   <html lang="en" className={petitFormal.variable}>
+   Keep <body className={inter.className}> as-is.
+
+4. Open src/app/globals.css. Find:
+   .font-handwriting { font-family: 'Petit Formal Script', cursive; }
+   Change to:
+   .font-handwriting { font-family: var(--font-handwriting), 'Petit Formal Script', cursive; }
+
+--- Fix 2: Enable music looping (Bug H2) ---
+
+5. Open src/components/music-player/index.tsx
+6. In the first useEffect (creates Audio), after:
+   audioRef.current = new Audio(`/music/${songId}.mp3`);
+   Add immediately:
+   audioRef.current.loop = true;
+
+7. Remove the entire second useEffect (// Handle song end) — the one with the 'ended' event listener. Delete the whole block.
+
+--- Verify and Commit ---
+
+8. cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook
+9. Run: pnpm build
+10. Confirm 0 TypeScript errors.
+11. git add src/app/layout.tsx src/app/globals.css src/components/music-player/index.tsx
+12. git commit -m "fix: load Petit Formal Script font + enable music looping (C1, H2)"
+
+COMPLETION CHECK:
+- Re-read layout.tsx: Petit_Formal_Script imported + petitFormal.variable on <html>
+- Re-read globals.css: .font-handwriting uses var(--font-handwriting)
+- Re-read music-player/index.tsx: loop = true set + ended useEffect removed
+- pnpm build passed (0 errors)
+- Report commit hash
+
+Send completion to BOTH channels:
+- Telegram: channel="telegram", target="5776469042"
+- iMessage: channel="bluebubbles", target="+18083483131"
+Message: "✅ Cron 1/6 done — handwriting font loaded, music loops. Build clean. Commit: [hash]"

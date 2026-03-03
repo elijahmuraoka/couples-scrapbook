@@ -1,0 +1,85 @@
+TASK: Fix 3 issues in the couples-scrapbook app — remove dead orientations state from BookViewer, fix isLoading not resetting in scrapbook-access, and make the book viewer responsive (portrait on mobile, two-page spread on desktop).
+
+FIRST: Read these files:
+1. /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/context.md — project context + bug details (M1, M5, H3)
+2. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/components/book-viewer/index.tsx — the BookViewer (392 lines) — READ THE WHOLE THING before editing
+3. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/(home)/components/scrapbook-access.tsx — the isLoading bug
+
+INSTRUCTIONS:
+
+All work in /Users/bob/.openclaw/workspace/repos/couples-scrapbook on the design-audit branch. Run `git branch` first to confirm.
+
+--- Fix 1: Remove dead orientations state (Bug M5) ---
+
+The BookViewer has an `orientations` state array that's set on every photo's onLoad event but is never READ anywhere — it just triggers re-renders. Remove it entirely.
+
+1. Open src/components/book-viewer/index.tsx
+2. Find and remove the orientations state declaration:
+   const [orientations, setOrientations] = useState<Array<'vertical' | 'horizontal'>>(
+       new Array(photos.length).fill('horizontal')
+   );
+3. Find any onLoad handler that calls setOrientations (it looks like: `const newOrientations = [...orientations]; newOrientations[index] = ...; setOrientations(newOrientations);`) and remove it from the img elements.
+4. Remove the onLoad={...} prop from the photo img tags that only served to update orientations.
+
+--- Fix 2: Fix isLoading not resetting (Bug M1) ---
+
+5. Open src/app/(home)/components/scrapbook-access.tsx
+6. Find the "Create New Scrapbook" link/button that calls setIsLoading(true) onClick. The simplest fix: remove the setIsLoading(true) call from the onClick. The Link component handles its own navigation state — the manual loading flag causes a stuck "Getting Ready..." state if Next.js router cache preserves the component. If removing it causes the button to look unresponsive on click, instead replace setIsLoading(true) with nothing (or a router.push() call if it's not already a Link). Read the file first to see the exact implementation.
+
+--- Fix 3: Responsive portrait/spread — MOST IMPORTANT FIX (Bug H3) ---
+
+Currently usePortrait={true} is hardcoded in HTMLFlipBook. On desktop, the book shows one page at a time (like mobile) instead of a beautiful two-page spread. This needs to be responsive.
+
+Read the full book-viewer/index.tsx carefully before editing. Then:
+
+7. Near the top of the BookViewer component function (after the existing useState declarations), add:
+   const [isPortrait, setIsPortrait] = useState(true);
+
+8. Add a useEffect to listen for viewport changes:
+   useEffect(() => {
+       const mq = window.matchMedia('(min-width: 768px)');
+       const handler = (e: MediaQueryListEvent) => setIsPortrait(!e.matches);
+       setIsPortrait(!mq.matches); // Set initial value
+       mq.addEventListener('change', handler);
+       return () => mq.removeEventListener('change', handler);
+   }, []);
+
+9. Find the HTMLFlipBook component (around line 330-350). Change:
+   usePortrait={true}
+   to:
+   usePortrait={isPortrait}
+
+10. Now fix the dot navigation math. Find the dot navigation section (after the HTMLFlipBook closing tag). The current code has:
+    const activeDot = currentPage === 0 ? 0 : Math.ceil(currentPage / 2);
+    const dotCount = Math.ceil(pages.length / 2);
+
+    The problem: in portrait mode, react-pageflip reports page numbers as individual pages (0,1,2,3...). In spread mode, it also increments page numbers individually but pages are shown in pairs.
+
+    Replace those two lines with:
+    // Portrait (mobile): one page per view — dotCount = total pages, activeDot = currentPage
+    // Spread (desktop): pages pair up — dotCount = half of total, activeDot accounts for pairs
+    const dotCount = isPortrait ? pages.length : Math.ceil(pages.length / 2);
+    const activeDot = isPortrait
+        ? currentPage
+        : currentPage === 0 ? 0 : Math.ceil(currentPage / 2);
+
+    Note: This IIFE is inside showNavigation && (() => { ... })() — edit the two lines inside it.
+
+--- Verify and Commit ---
+
+11. cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook
+12. Run: pnpm build
+13. Confirm 0 TypeScript errors.
+14. git add src/components/book-viewer/index.tsx src/app/(home)/components/scrapbook-access.tsx
+15. git commit -m "fix: responsive portrait/spread, remove dead orientations state, fix isLoading (H3, M5, M1)"
+
+COMPLETION CHECK:
+- Re-read book-viewer/index.tsx: orientations state GONE, isPortrait state exists, usePortrait={isPortrait}, dot logic uses isPortrait
+- Re-read scrapbook-access.tsx: setIsLoading(true) removed or replaced
+- pnpm build passed (0 errors)
+- Report commit hash
+
+Send completion to BOTH channels:
+- Telegram: channel="telegram", target="5776469042"
+- iMessage: channel="bluebubbles", target="+18083483131"
+Message: "✅ Cron 3/6 done — responsive book spread on desktop, dead state removed, isLoading fixed. Build clean. Commit: [hash]"

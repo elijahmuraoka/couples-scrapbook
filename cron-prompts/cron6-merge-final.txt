@@ -1,0 +1,86 @@
+TASK: Merge the design-audit branch into main for the couples-scrapbook app, run a final build check, and report a complete summary of everything that was fixed and built today.
+
+FIRST: Read these files:
+1. /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/plan.md — the full plan (to confirm all items done)
+2. /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/context.md — project context
+
+INSTRUCTIONS:
+
+All work in /Users/bob/.openclaw/workspace/repos/couples-scrapbook. Run `git status` and `git branch` first.
+
+--- Step 1: Final build check on design-audit ---
+1. cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook
+2. Confirm you're on design-audit: git branch
+3. Run: pnpm build
+4. If there are errors: STOP. Do not merge. Send a message: "❌ Cron 6 blocked — build failing on design-audit. Errors: [list errors]. Cannot merge. Elijah needs to review."
+5. If build is clean (0 errors): continue.
+
+--- Step 2: Review what's being merged ---
+6. Run: git log --oneline main..design-audit
+7. Note all commits that will be merged. There should be many: the original 7 UI/mobile polish commits + 4 bug fix commits + possibly 1 integration fix commit.
+
+--- Step 3: Merge design-audit into main ---
+8. git checkout main
+9. git pull origin main (ensure main is up to date)
+10. git merge design-audit --no-ff -m "merge: design-audit — UI polish, bug fixes, custom music upload
+
+Includes:
+- 3-phase UI/UX refinement (dots, music player, bio card, cover, typography)
+- Mobile polish (7 commits)
+- fix: load Petit Formal Script handwriting font (C1)
+- fix: enable music looping (H2)
+- fix: DELETE rollback endpoint + binary photo upload + RLS policy (H1, H4, M3)
+- fix: responsive portrait/spread + remove dead state + isLoading (H3, M5, M1)
+- feat: custom audio file upload for scrapbook creator"
+
+11. If merge conflicts: do NOT auto-resolve. Stop and report: "❌ Merge conflict. Files: [list]. Elijah needs to resolve."
+
+--- Step 4: Final build check on main ---
+12. Run: pnpm build on main
+13. Must pass with 0 errors.
+14. If it fails: git checkout design-audit (revert back) and report the error.
+
+--- Step 5: Update session files ---
+15. Read /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/state.json
+16. Update it with:
+    - workingOn: "All bug fixes + custom music done. design-audit merged to main."
+    - waitingFor: "Elijah to run supabase db push for migrations 002 + 003, and trigger Vercel deploy"
+    - recentDecisions: add "design-audit merged to main on Mar 3 after full bug fix + feature pass"
+    - nextSteps: ["Run: supabase db push (applies migrations 002 + 003)", "Trigger Vercel deploy or push to main to auto-deploy", "Test on live URL: font renders, music loops, desktop spread, custom music upload works"]
+17. Append to /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/log.md:
+    ## 2026-03-03 (afternoon)
+    - Crons 1-5 applied all bug fixes + custom music feature
+    - design-audit merged to main
+    - Pending: supabase db push for migrations 002 (RLS delete) + 003 (custom_music_url column)
+    - Pending: Vercel deploy trigger
+18. git -C /Users/bob/.openclaw/workspace/repos/personal add sessions/couples-scrapbook/
+19. git -C /Users/bob/.openclaw/workspace/repos/personal commit -m "chore: session sync couples-scrapbook — all fixes done, merged to main"
+
+--- Summary to report ---
+
+COMPLETION CHECK:
+- Final build on main passes ✓
+- Merge commit hash
+- Count of commits merged (design-audit → main)
+- Supabase migrations still to apply (002 + 003) — remind Elijah
+- Session files updated ✓
+
+Send completion to BOTH channels:
+- Telegram: channel="telegram", target="5776469042"
+- iMessage: channel="bluebubbles", target="+18083483131"
+
+Message (format this clearly):
+"✅ Cron 6/6 done — all done! design-audit → main merged. Build clean.
+
+What was fixed today:
+- 🔤 Handwriting font (Petit Formal Script) now loads correctly
+- 🎵 Music loops continuously instead of stopping
+- 🖥️ Desktop shows two-page book spread (not single pages)
+- 📸 Photo upload uses binary (no base64 overhead)
+- 🗑️ DELETE endpoint prevents orphaned DB rows on failed publish
+- 💾 Dead state removed, isLoading bug fixed
+- 🎶 New: creators can upload their own audio file as background music
+
+⚠️ Action needed: run 'supabase db push' in repos/couples-scrapbook to apply 2 pending migrations (RLS delete + custom_music_url column). Then trigger a Vercel deploy.
+
+Merge commit: [hash]"
