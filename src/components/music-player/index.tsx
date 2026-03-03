@@ -6,13 +6,15 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface MusicPlayerProps {
-    songId: string;
+    songId?: string;
+    src?: string;
     className?: string;
     autoPlay?: boolean;
 }
 
 export function MusicPlayer({
     songId,
+    src,
     className,
     autoPlay = false,
 }: MusicPlayerProps) {
@@ -20,13 +22,24 @@ export function MusicPlayer({
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
-        audioRef.current = new Audio(`/music/${songId}.mp3`);
+        const audioSrc = src || (songId ? `/music/${songId}.mp3` : null);
+
+        if (!audioSrc) {
+            audioRef.current = null;
+            setIsPlaying(false);
+            return;
+        }
+
+        const audio = new Audio(audioSrc);
+        audio.loop = true;
+        audioRef.current = audio;
 
         if (autoPlay) {
-            // Small delay to ensure audio is loaded
             const timer = setTimeout(() => {
-                audioRef.current?.play();
-                setIsPlaying(true);
+                audioRef.current
+                    ?.play()
+                    .then(() => setIsPlaying(true))
+                    .catch(() => setIsPlaying(false));
             }, 500);
 
             return () => {
@@ -35,6 +48,7 @@ export function MusicPlayer({
                     audioRef.current.pause();
                     audioRef.current = null;
                 }
+                setIsPlaying(false);
             };
         }
 
@@ -43,33 +57,28 @@ export function MusicPlayer({
                 audioRef.current.pause();
                 audioRef.current = null;
             }
+            setIsPlaying(false);
         };
-    }, [songId, autoPlay]);
+    }, [songId, src, autoPlay]);
 
     const togglePlay = () => {
         if (!audioRef.current) return;
 
         if (isPlaying) {
             audioRef.current.pause();
-        } else {
-            audioRef.current.play();
+            setIsPlaying(false);
+            return;
         }
-        setIsPlaying(!isPlaying);
+
+        audioRef.current
+            .play()
+            .then(() => setIsPlaying(true))
+            .catch(() => setIsPlaying(false));
     };
 
-    // Handle song end
-    useEffect(() => {
-        if (!audioRef.current) return;
-
-        const handleEnded = () => setIsPlaying(false);
-        audioRef.current.addEventListener('ended', handleEnded);
-
-        return () => {
-            if (audioRef.current) {
-                audioRef.current.removeEventListener('ended', handleEnded);
-            }
-        };
-    }, []);
+    if (!songId && !src) {
+        return null;
+    }
 
     return (
         <Button

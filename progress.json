@@ -1,0 +1,98 @@
+{
+  "currentPhase": 6,
+  "maxPhase": 6,
+  "phases": {
+    "1": {
+      "status": "done",
+      "description": "Load Petit Formal Script font + enable music looping (C1, H2)",
+      "completedAt": "2026-03-03T10:23:00-05:00",
+      "commit": "a630d6f"
+    },
+    "2": {
+      "status": "done",
+      "description": "DELETE rollback endpoint + binary photo upload + RLS delete policy (H1, H4, M3)",
+      "completed": [
+        "DELETE endpoint in route.ts",
+        "Replace base64 with Uint8Array in preview/page.tsx",
+        "Create 002_delete_policy.sql migration"
+      ],
+      "remaining": [],
+      "completedAt": "2026-03-03T11:31:00-05:00",
+      "commit": "9bbdf7b"
+    },
+    "3": {
+      "status": "done",
+      "description": "Remove dead orientations state + fix isLoading + responsive portrait/spread (M5, M1, H3)",
+      "completed": [
+        "Remove orientations state from book-viewer",
+        "Fix isLoading in scrapbook-access",
+        "Add isPortrait responsive logic",
+        "Update dot navigation math for spread mode"
+      ],
+      "remaining": [],
+      "completedAt": "2026-03-03T12:01:34-05:00",
+      "commit": "2393608"
+    },
+    "4": {
+      "status": "done",
+      "description": "Custom audio file upload feature — creator drops their own MP3",
+      "completed": [
+        "Migration 003_custom_music.sql",
+        "Add custom_music_url to Supabase and Scrapbook types",
+        "Store now tracks customMusicFile",
+        "MusicPlayer supports optional songId/src with safe audio guard",
+        "MusicSelector adds custom MP3 upload UI and preset/custom mutual exclusion",
+        "Scrapbook form wires custom file handler",
+        "Preview uploads custom audio and sends customMusicUrl in publish payload",
+        "API route validates and stores customMusicUrl",
+        "Scrapbook viewer plays preset or custom music URL"
+      ],
+      "remaining": [],
+      "completedAt": "2026-03-03T12:30:00-05:00",
+      "commit": "5cb957b"
+    },
+    "5": {
+      "status": "done",
+      "description": "Integration check — build, lint, verify all fixes, browser test mobile + desktop",
+      "completed": [
+        "pnpm build clean (0 errors)",
+        "pnpm lint clean (0 errors, warnings only)",
+        "Verified KNOWN-ISSUES checklist via grep checks",
+        "Browser test desktop 1280x800: home/create/scrapbook viewer verified spread mode",
+        "Browser test mobile 390x844: create/scrapbook viewer verified portrait mode",
+        "Verified existing scrapbook route loads and handwriting font renders",
+        "Captured desktop and mobile screenshots for validation"
+      ],
+      "remaining": [],
+      "completedAt": "2026-03-03T13:05:15-05:00",
+      "commit": "d898395"
+    },
+    "6": {
+      "status": "pending",
+      "description": "Merge design-audit → main, final build, session sync",
+      "completed": [],
+      "remaining": [
+        "Final build on design-audit",
+        "Merge to main (--no-ff)",
+        "Build on main",
+        "Update session files",
+        "Report completion"
+      ]
+    }
+  },
+  "lastRunResult": "Phase 5 completed: ran pnpm build and pnpm lint (both clean; warnings only), verified regression checklist (font import, music loop, DELETE endpoint, binary upload path, responsive usePortrait, dead-state removal, custom-music migration, no Buffer client imports), and completed browser validation on desktop (1280x800) + mobile (390x844). Confirmed viewer spread on desktop, portrait on mobile, and scrapbook route load success.",
+  "lastRunAt": "2026-03-03T13:05:15-05:00",
+  "blockers": [],
+  "consecutiveBlockerRuns": 0,
+  "metrics": {
+    "fixesApplied": 8,
+    "fixesTotal": 10,
+    "featuresApplied": 1,
+    "featuresTotal": 1,
+    "buildClean": true
+  },
+  "cronIds": {
+    "loop": "59c2c4c9-d8a2-41de-bb76-af76c7bdc976",
+    "audit": "7a26bf91-2ae5-430e-aec1-2daa0703c841"
+  }
+}

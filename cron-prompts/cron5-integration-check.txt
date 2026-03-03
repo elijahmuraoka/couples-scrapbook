@@ -1,0 +1,105 @@
+TASK: Run a full integration check on the couples-scrapbook app after all 4 previous coding crons. Verify the build is clean, trace all changed code paths, and fix any issues found.
+
+FIRST: Read these files:
+1. /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/context.md — project context
+2. /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/plan.md — the original bug fix plan
+3. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/layout.tsx — should have Petit_Formal_Script font
+4. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/components/music-player/index.tsx — should have loop=true + optional src prop
+5. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/preview/page.tsx — should have binary upload + custom music
+6. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/components/book-viewer/index.tsx — should have isPortrait responsive logic
+
+INSTRUCTIONS:
+
+All work in /Users/bob/.openclaw/workspace/repos/couples-scrapbook on the design-audit branch. Confirm: run `git branch`.
+
+--- Step 1: Build check ---
+1. cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook
+2. Run: pnpm build
+3. Note ALL errors and warnings.
+
+--- Step 2: Trace and verify each planned fix ---
+
+Check each fix was actually implemented by reading the relevant files:
+
+A. Font fix (C1):
+   - Read src/app/layout.tsx
+   - Verify: Petit_Formal_Script imported from next/font/google ✓
+   - Verify: petitFormal.variable applied to <html> className ✓
+   - Verify: globals.css .font-handwriting uses var(--font-handwriting) ✓
+   - If any are missing: implement the fix now
+
+B. Music loop (H2):
+   - Read src/components/music-player/index.tsx
+   - Verify: audioRef.current.loop = true ✓
+   - Verify: no 'ended' event listener useEffect ✓
+   - Verify: optional src prop supported ✓ (added by Cron 4)
+   - If missing: implement
+
+C. DELETE endpoint (H1):
+   - Read src/app/api/scrapbooks/route.ts
+   - Verify: export async function DELETE exists ✓
+   - If missing: implement (see context.md for fix details)
+
+D. Binary upload (H4):
+   - Read src/app/preview/page.tsx
+   - Verify: uploadPhotos uses Uint8Array, no FileReader, no Buffer.from ✓
+   - Verify: customMusicFile is excluded from publishData destructuring ✓
+   - If missing: implement
+
+E. Responsive portrait/spread (H3):
+   - Read src/components/book-viewer/index.tsx
+   - Verify: isPortrait state exists ✓
+   - Verify: usePortrait={isPortrait} ✓
+   - Verify: dot logic uses isPortrait ✓
+   - If missing: implement
+
+F. Custom music feature (Cron 4):
+   - Verify: supabase/migrations/003_custom_music.sql exists ✓
+   - Verify: MusicSelector has upload section ✓
+   - Verify: scrapbook viewer uses customMusicUrl when present ✓
+   - If missing or partial: complete the implementation
+
+--- Step 3: Fix all TypeScript errors from the build ---
+
+If pnpm build had errors, read each error carefully and fix it. Common issues:
+- Missing customMusicFile in initialState of useScrapbookStore → add it
+- customMusicUrl type mismatch → make sure it's string | null consistently
+- MusicPlayer songId undefined issue → make prop optional: songId?: string
+- Any 'ended' event listener still present → remove it
+- Import of Upload icon missing in music-selector → add it
+
+After each fix, re-run: pnpm build
+
+--- Step 4: Lint check ---
+4. Run: pnpm lint (or npx eslint src --ext .ts,.tsx)
+5. Note any new errors (warnings are OK). Fix any errors.
+
+--- Step 5: Check git log ---
+6. Run: git log --oneline -8
+7. Confirm all 4 previous crons' commits are present:
+   - fix: load Petit Formal Script font + enable music looping (C1, H2)
+   - fix: add DELETE rollback endpoint + binary photo upload + RLS delete policy (H1, H4, M3)
+   - fix: responsive portrait/spread, remove dead orientations state, fix isLoading (H3, M5, M1)
+   - feat: custom audio file upload
+
+If any commits are missing, those fixes weren't applied. Implement the missing work.
+
+--- Step 6: Commit any fixes made in this cron ---
+If you made any fixes:
+git add -A
+git commit -m "fix: integration check — resolve build errors and missing implementations"
+
+--- Step 7: Final build confirmation ---
+Run: pnpm build one more time.
+Must pass with 0 errors.
+
+COMPLETION CHECK:
+- pnpm build: 0 errors ✓
+- All 5 fixes verified (C1, H2, H1, H4, H3, custom music) ✓
+- Report what was found broken vs already correct
+- Report final commit hash (if you made fixes) or "no fixes needed"
+
+Send completion to BOTH channels:
+- Telegram: channel="telegram", target="5776469042"
+- iMessage: channel="bluebubbles", target="+18083483131"
+Message: "✅ Cron 5/6 done — integration check complete. [X] fixes applied, build clean. [Summary of what was fixed or 'All previous crons applied correctly.']. Ready for final merge."

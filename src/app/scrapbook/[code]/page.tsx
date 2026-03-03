@@ -27,6 +27,7 @@ async function fetchScrapbook(code: string): Promise<{
             note: data.note ?? undefined,
             sender_name: data.sender_name ?? undefined,
             music_id: data.music_id ?? undefined,
+            custom_music_url: data.custom_music_url ?? undefined,
             is_published: data.is_published,
             created_at: new Date(data.created_at),
             photos: ((data as Record<string, unknown>).photos as Array<Record<string, unknown>>)
@@ -62,7 +63,7 @@ export default async function ScrapbookPage({
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-8 md:p-12 w-full">
+        <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white px-4 pt-14 pb-8 md:p-12 w-full">
             <div className="max-w-5xl w-full mx-auto">
                 {/* Back to Home Button */}
                 <Link href="/">

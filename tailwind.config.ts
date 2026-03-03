@@ -12,6 +12,15 @@ export default {
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
+  			// Phase 2: Semantic romantic palette for theming.
+  			// Use romantic-* classes instead of hardcoded pink-* where possible.
+  			romantic: {
+  				DEFAULT: 'hsl(var(--romantic))',
+  				hover: 'hsl(var(--romantic-hover))',
+  				light: 'hsl(var(--romantic-light))',
+  				border: 'hsl(var(--romantic-border))',
+  				muted: 'hsl(var(--romantic-muted))',
+  			},
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'

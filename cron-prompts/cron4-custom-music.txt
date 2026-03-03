@@ -1,0 +1,272 @@
+TASK: Add a custom music upload feature to the couples-scrapbook app — let the creator drop their own audio file instead of only picking from 6 presets.
+
+FIRST: Read ALL of these files before writing a single line of code:
+1. /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/context.md — project context
+2. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/types/scrapbook.ts — ScrapbookDraft + Scrapbook types
+3. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/types/supabase.ts — DB types
+4. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/store/useScrapbookStore.ts — Zustand store
+5. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/create/components/music-selector.tsx — existing music selector
+6. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/components/music-player/index.tsx — MusicPlayer component
+7. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/preview/page.tsx — publish flow + uploadPhotos
+8. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/api/scrapbooks/route.ts — API route
+9. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/scrapbook/[code]/page.tsx — scrapbook viewer page
+10. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/scrapbook/[code]/components/scrapbook-main.tsx — viewer component with MusicPlayer
+
+All work in /Users/bob/.openclaw/workspace/repos/couples-scrapbook on the design-audit branch. Run `git branch` first.
+
+DESIGN INTENT:
+- Keep the 6 preset songs exactly as they are
+- Add an "Upload your own" option at the BOTTOM of the music selector card
+- File picker accepts audio/mp3, audio/mpeg, audio/m4a, audio/wav, audio/ogg (accept="audio/*")
+- Show the selected file name + a play/pause preview button
+- Picking a custom file deselects any preset (and vice versa)
+- On publish: upload the audio file to Supabase Storage (photos bucket, music/ prefix)
+- Store the public URL in a new custom_music_url column in the scrapbooks table
+- In the scrapbook viewer: play custom URL if present, else fall back to preset
+
+INSTRUCTIONS — implement in this exact order:
+
+--- Step 1: Supabase migration ---
+Create: supabase/migrations/003_custom_music.sql
+Content:
+-- Add custom music URL to support creator-uploaded audio files
+ALTER TABLE scrapbooks ADD COLUMN custom_music_url TEXT;
+
+--- Step 2: Update DB types ---
+Open src/types/supabase.ts.
+In the scrapbooks table types, add `custom_music_url: string | null` to Row, Insert, and Update sections.
+
+--- Step 3: Update app types ---
+Open src/types/scrapbook.ts.
+1. Add to ScrapbookDraft interface:
+   customMusicFile?: File | null;
+2. Add to Scrapbook interface:
+   customMusicUrl?: string | null;
+
+--- Step 4: Update Zustand store ---
+Open src/store/useScrapbookStore.ts.
+1. Add `customMusicFile: null` to initialState (matching the ScrapbookDraft type change).
+2. The clearDraft function iterates previews to revoke blob URLs — it doesn't need changes since customMusicFile is just a File reference (no blob URL stored in draft).
+
+--- Step 5: Update MusicPlayer to accept custom src ---
+Open src/components/music-player/index.tsx.
+1. Update the MusicPlayerProps interface:
+   - Make songId optional: `songId?: string;`
+   - Add: `src?: string;`
+2. In the useEffect that creates the Audio object, derive the audio source:
+   const audioSrc = src || (songId ? `/music/${songId}.mp3` : '');
+   Replace `new Audio(\`/music/${songId}.mp3\`)` with `new Audio(audioSrc)` (only create if audioSrc is non-empty).
+3. Add a guard: if (!audioSrc) return; at the top of the useEffect.
+4. Update the dependency array of the useEffect to include [songId, src, autoPlay] (replacing [songId, autoPlay]).
+
+--- Step 6: Update MusicSelector to add custom upload option ---
+Open src/app/create/components/music-selector.tsx.
+1. Add a new prop: `onCustomFile?: (file: File | null) => void;`
+2. Add local state for the custom file and its preview:
+   const [customFile, setCustomFile] = useState<File | null>(null);
+   const [customPreviewUrl, setCustomPreviewUrl] = useState<string | null>(null);
+3. Add a handler for when user picks a file:
+   const handleCustomFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+       const file = e.target.files?.[0] || null;
+       if (customPreviewUrl) URL.revokeObjectURL(customPreviewUrl);
+       if (file) {
+           const previewUrl = URL.createObjectURL(file);
+           setCustomFile(file);
+           setCustomPreviewUrl(previewUrl);
+           onSelect(null); // Deselect any preset
+           onCustomFile?.(file);
+       } else {
+           setCustomFile(null);
+           setCustomPreviewUrl(null);
+           onCustomFile?.(null);
+       }
+   };
+4. Add cleanup effect: useEffect(() => () => { if (customPreviewUrl) URL.revokeObjectURL(customPreviewUrl); }, [customPreviewUrl]);
+5. At the bottom of the CardContent (after the 6 preset songs), add a divider and the upload section:
+   <div className="mt-4 pt-4 border-t border-pink-100">
+     <p className="text-sm text-gray-500 mb-3">Or upload your own song</p>
+     <div className="flex items-center gap-3">
+       <label className="flex-1 flex items-center gap-3 p-3 rounded-lg border-2 border-dashed border-pink-200 hover:border-pink-300 hover:bg-pink-50/30 cursor-pointer transition-all">
+         <Upload className="h-4 w-4 text-pink-400 shrink-0" />
+         <span className="text-sm text-gray-600 truncate">
+           {customFile ? customFile.name : 'Click to upload an audio file'}
+         </span>
+         <input
+           type="file"
+           accept="audio/*"
+           className="sr-only"
+           onChange={handleCustomFileChange}
+         />
+       </label>
+       {customPreviewUrl && (
+         <Button
+           size="icon"
+           variant="ghost"
+           className="h-8 w-8 rounded-full shrink-0"
+           onClick={(e) => {
+             e.preventDefault();
+             // Toggle preview playback
+             if (!audio) return;
+             if (playingSongId === '__custom__') {
+               audio.pause();
+               setPlayingSongId(null);
+             } else {
+               audio.pause();
+               audio.src = customPreviewUrl;
+               audio.play();
+               setPlayingSongId('__custom__');
+             }
+           }}
+         >
+           {playingSongId === '__custom__' ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
+         </Button>
+       )}
+     </div>
+     {customFile && (
+       <p className="text-xs text-pink-600 font-medium mt-2">✓ Custom song selected</p>
+     )}
+   </div>
+
+6. Add Upload to the lucide-react import: `import { Play, Pause, Music2, Upload } from 'lucide-react';`
+
+--- Step 7: Wire customMusicFile in the create form ---
+Open src/app/create/components/scrapbook-form.tsx (or wherever MusicSelector is rendered in the create page — find it).
+1. Read the file first to understand how MusicSelector is called and how updateDraft is used.
+2. Add onCustomFile handler to the MusicSelector call:
+   onCustomFile={(file) => updateDraft({ customMusicFile: file })}
+3. When a preset is selected (onSelect), also clear the custom file:
+   onSelect={(songId) => {
+     updateDraft({ selectedSongId: songId, customMusicFile: null });
+   }}
+
+--- Step 8: Upload custom music on publish ---
+Open src/app/preview/page.tsx.
+1. After the uploadPhotos function, add a new function:
+
+async function uploadCustomMusic(scrapbookId: string, file: File): Promise<string> {
+    const supabase = createClient();
+    const ext = file.name.split('.').pop() || 'mp3';
+    const fileName = `music/${scrapbookId}-${Date.now()}.${ext}`;
+    const arrayBuffer = await file.arrayBuffer();
+    const fileData = new Uint8Array(arrayBuffer);
+
+    const { error } = await supabase.storage
+        .from('photos')
+        .upload(fileName, fileData, {
+            contentType: file.type || 'audio/mpeg',
+            cacheControl: '3600',
+        });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(fileName);
+    return publicUrl;
+}
+
+2. In the handlePublish function, find where publishData is constructed and the POST body is sent:
+   const { previews, selectedFiles, ...publishData } = draft;
+   
+   Before the scrapbookPromise fetch, check if there's a custom music file and upload it:
+   
+   let customMusicUrl: string | null = null;
+   if (draft.customMusicFile) {
+       customMusicUrl = await uploadCustomMusic(draft.customMusicFile.name, draft.customMusicFile);
+       // Wait, we need the scrapbookId first — move this AFTER getting scrapbookId
+   }
+   
+   Actually: the music upload needs to happen AFTER the scrapbook is created (we need scrapbookId for the filename). Here's the correct sequence:
+   a. Create scrapbook with POST (gets scrapbookId + code)
+   b. Upload photos (uploadPhotos)
+   c. If customMusicFile: uploadCustomMusic(scrapbookId, draft.customMusicFile) → get URL
+   d. If customMusicUrl: PATCH the scrapbook to set custom_music_url
+
+   But PATCH endpoint doesn't exist. Alternative: include customMusicUrl in the initial POST and upload music before creating the scrapbook record.
+
+   Actually simpler: upload music FIRST (before POST), using a temp filename without scrapbookId:
+   
+   // If custom music file exists, upload it first
+   if (draft.customMusicFile) {
+       try {
+           customMusicUrl = await uploadCustomMusic(draft.customMusicFile);
+       } catch (err) {
+           console.warn('Custom music upload failed, proceeding without:', err);
+           customMusicUrl = null;
+       }
+   }
+   
+   Then include customMusicUrl in the POST body alongside publishData.
+   
+   Update the publishData destructuring:
+   const { previews, selectedFiles, customMusicFile, ...publishData } = draft;
+   
+   And send:
+   body: JSON.stringify({ ...publishData, customMusicUrl })
+
+3. Update the uploadCustomMusic function to not require scrapbookId (use Date.now() + random for filename):
+
+async function uploadCustomMusic(file: File): Promise<string> {
+    const supabase = createClient();
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'mp3';
+    const fileName = `music/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const arrayBuffer = await file.arrayBuffer();
+    const fileData = new Uint8Array(arrayBuffer);
+
+    const { error } = await supabase.storage
+        .from('photos')
+        .upload(fileName, fileData, {
+            contentType: file.type || 'audio/mpeg',
+            cacheControl: '3600',
+        });
+
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage.from('photos').getPublicUrl(fileName);
+    return publicUrl;
+}
+
+--- Step 9: Update API route to accept + store customMusicUrl ---
+Open src/app/api/scrapbooks/route.ts.
+1. In the validateBody function, add customMusicUrl as an optional field (string | null, max 500 chars).
+2. Update the return type of validateBody to include `customMusicUrl: string | null`.
+3. In the POST handler, destructure `customMusicUrl` from validation.data and include it in the insert:
+   custom_music_url: customMusicUrl,
+
+--- Step 10: Update scrapbook viewer to pass custom music ---
+Open src/app/scrapbook/[code]/page.tsx.
+Read how it fetches from Supabase and constructs the Scrapbook object.
+Add `customMusicUrl: data.custom_music_url ?? undefined` to the scrapbook object.
+
+Open src/app/scrapbook/[code]/components/scrapbook-main.tsx.
+Update the MusicPlayer render:
+  Change: {scrapbook.music_id && <MusicPlayer songId={scrapbook.music_id} autoPlay={false} />}
+  To: {(scrapbook.music_id || scrapbook.customMusicUrl) && (
+    <MusicPlayer
+      songId={scrapbook.music_id}
+      src={scrapbook.customMusicUrl}
+      autoPlay={false}
+    />
+  )}
+
+--- Verify and Commit ---
+
+Run: pnpm build
+Fix any TypeScript errors. If you get "Type 'File | null | undefined' is not assignable..." — make sure customMusicFile is File | null (not undefined) in both the type and initialState.
+Confirm 0 errors.
+
+git add -A
+git commit -m "feat: custom audio file upload — creators can upload their own song (replaces preset-only selection)"
+
+COMPLETION CHECK:
+- Migration 003_custom_music.sql exists
+- MusicPlayer accepts optional src prop
+- MusicSelector has "Upload your own" section with file picker
+- uploadCustomMusic function uploads to Supabase photos bucket under music/ prefix
+- API route stores custom_music_url
+- Scrapbook viewer uses custom URL when present
+- pnpm build passes (0 errors)
+- Report commit hash
+
+Send completion to BOTH channels:
+- Telegram: channel="telegram", target="5776469042"
+- iMessage: channel="bluebubbles", target="+18083483131"
+Message: "✅ Cron 4/6 done — custom music upload feature added. Creator can drop their own MP3. Build clean. Commit: [hash]. ⚠️ Migration 003 also needs 'supabase db push'."

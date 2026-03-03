@@ -1,0 +1,143 @@
+TASK: Fix 3 bugs in the couples-scrapbook app — add a DELETE API endpoint, replace base64 photo upload with binary Uint8Array, and add a Supabase RLS delete policy.
+
+FIRST: Read these files:
+1. /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/context.md — bug details for H1, H4, M3
+2. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/api/scrapbooks/route.ts — current API (POST only, no DELETE)
+3. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/src/app/preview/page.tsx — uploadPhotos function (uses FileReader + base64 — needs replacing)
+4. /Users/bob/.openclaw/workspace/repos/couples-scrapbook/supabase/migrations/001_enable_rls.sql — existing RLS policies
+
+INSTRUCTIONS:
+
+All work in /Users/bob/.openclaw/workspace/repos/couples-scrapbook on the design-audit branch. Confirm: run `git branch`.
+
+--- Fix 1: Add DELETE API endpoint (Bug H1) ---
+
+The publish flow: POST creates scrapbook → upload photos. If photos fail, preview/page.tsx calls DELETE /api/scrapbooks?code=... to rollback. But no DELETE handler exists — the rollback silently 404s, leaving orphaned scrapbook rows forever.
+
+1. Open src/app/api/scrapbooks/route.ts
+2. At the very end of the file, add this new exported function:
+
+export async function DELETE(req: Request) {
+    try {
+        const url = new URL(req.url);
+        const code = url.searchParams.get('code');
+        if (!code) {
+            return Response.json({ error: 'Code required' }, { status: 400 });
+        }
+
+        const supabase = await createClient();
+
+        const { data: scrapbook } = await supabase
+            .from('scrapbooks')
+            .select('id')
+            .eq('code', code)
+            .single();
+
+        if (!scrapbook) {
+            return Response.json({ ok: true }); // Already gone, that's fine
+        }
+
+        // Delete photos first (FK constraint), then scrapbook
+        await supabase.from('photos').delete().eq('scrapbook_id', scrapbook.id);
+        await supabase.from('scrapbooks').delete().eq('id', scrapbook.id);
+
+        return Response.json({ ok: true });
+    } catch (error) {
+        console.error('Delete error:', error);
+        return Response.json({ error: 'Failed to delete scrapbook' }, { status: 500 });
+    }
+}
+
+--- Fix 2: Replace base64 upload with binary (Bug H4) ---
+
+The current uploadPhotos in preview/page.tsx uses FileReader + readAsDataURL + Buffer.from(base64). This adds 33% size overhead and risks hitting Vercel's 4.5MB body limit for large photos.
+
+3. Open src/app/preview/page.tsx
+4. Replace the entire uploadPhotos function with this cleaner binary version. Find the function:
+   async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
+   ...and replace the whole function with:
+
+async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
+    const supabase = createClient();
+    const photoPromises = draft.previews.map(async (blobUrl, index) => {
+        // Fetch blob directly as binary — no base64 needed
+        const response = await fetch(blobUrl);
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        const fileData = new Uint8Array(arrayBuffer);
+
+        // Use actual MIME type from the original File (not hardcoded jpeg)
+        const contentType = draft.selectedFiles[index]?.type || 'image/jpeg';
+        const ext = contentType.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
+        const fileName = `${scrapbookId}/${index}-${Date.now()}.${ext}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('photos')
+            .upload(fileName, fileData, {
+                contentType,
+                cacheControl: '3600',
+            });
+
+        if (uploadError) throw uploadError;
+
+        const {
+            data: { publicUrl },
+        } = supabase.storage.from('photos').getPublicUrl(fileName);
+
+        return supabase.from('photos').insert({
+            scrapbook_id: scrapbookId,
+            url: publicUrl,
+            order: index,
+            caption: draft.captions[index],
+            taken_at: draft.metadata[index]?.takenAt?.toISOString() ?? null,
+            location: draft.metadata[index]?.location,
+        });
+    });
+
+    await Promise.all(photoPromises);
+}
+
+5. Check the imports at the top of preview/page.tsx. Remove any reference to Buffer or FileReader imports if present (they were browser APIs used implicitly — no explicit imports needed, and Uint8Array needs no import either).
+
+--- Fix 3: RLS migration for deletes (Bug M3) ---
+
+Even with the DELETE endpoint, the Supabase anon role has no DELETE RLS policy — the delete would be silently blocked. Need a migration.
+
+6. Create a new file: supabase/migrations/002_delete_policy.sql with exactly this content:
+
+-- Migration: allow anon role to delete scrapbooks and photos
+-- Used by the DELETE /api/scrapbooks endpoint for rollback cleanup on failed publish.
+-- This app has no authentication; codes are 10-char nanoid (~59 bits entropy).
+-- Intentionally permissive for a personal single-user gift app.
+
+CREATE POLICY "Anyone can delete scrapbooks"
+    ON scrapbooks FOR DELETE
+    TO anon
+    USING (true);
+
+CREATE POLICY "Anyone can delete photos"
+    ON photos FOR DELETE
+    TO anon
+    USING (true);
+
+Note: This migration creates the SQL file. Elijah will need to apply it to the live Supabase project by running: supabase db push (from repos/couples-scrapbook with supabase CLI). Include this note in the completion message.
+
+--- Verify and Commit ---
+
+7. cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook
+8. Run: pnpm build
+9. Confirm 0 errors.
+10. git add src/app/api/scrapbooks/route.ts src/app/preview/page.tsx supabase/migrations/002_delete_policy.sql
+11. git commit -m "fix: add DELETE rollback endpoint + binary photo upload + RLS delete policy (H1, H4, M3)"
+
+COMPLETION CHECK:
+- Re-read route.ts: DELETE handler exists and handles rollback
+- Re-read preview/page.tsx: uploadPhotos uses Uint8Array (no FileReader, no Buffer.from)
+- Verify 002_delete_policy.sql exists with both CREATE POLICY statements
+- pnpm build passed (0 errors)
+- Report commit hash
+
+Send completion to BOTH channels:
+- Telegram: channel="telegram", target="5776469042"
+- iMessage: channel="bluebubbles", target="+18083483131"
+Message: "✅ Cron 2/6 done — DELETE endpoint, binary upload, RLS migration. Build clean. Commit: [hash]. ⚠️ Note: run 'supabase db push' to apply migration 002 to live DB."

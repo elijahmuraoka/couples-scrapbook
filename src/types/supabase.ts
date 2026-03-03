@@ -17,6 +17,7 @@ export interface Database {
           note: string | null
           sender_name: string | null
           music_id: string | null
+          custom_music_url: string | null
           is_published: boolean
           created_at: string
         }
@@ -27,6 +28,7 @@ export interface Database {
           note?: string | null
           sender_name?: string | null
           music_id?: string | null
+          custom_music_url?: string | null
           is_published?: boolean
           created_at?: string
         }
@@ -37,6 +39,7 @@ export interface Database {
           note?: string | null
           sender_name?: string | null
           music_id?: string | null
+          custom_music_url?: string | null
           is_published?: boolean
           created_at?: string
         }

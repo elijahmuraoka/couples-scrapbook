@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useScrapbookStore } from '@/store/useScrapbookStore';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { BookViewer } from '@/components/book-viewer';
 import { toast } from 'sonner';
-import { ArrowLeft, Eye } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { MusicPlayer } from '@/components/music-player';
 import { ScrapbookDraft } from '@/types/scrapbook';
 import { createClient } from '@/lib/supabase/client';
@@ -15,27 +15,19 @@ import confetti from 'canvas-confetti';
 async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
     const supabase = createClient();
     const photoPromises = draft.previews.map(async (blobUrl, index) => {
-        // Convert blob URL to base64
         const response = await fetch(blobUrl);
         const blob = await response.blob();
-        const base64Data = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result as string;
-                // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
-                const base64 = base64String.split(',')[1];
-                resolve(base64);
-            };
-            reader.readAsDataURL(blob);
-        });
+        const arrayBuffer = await blob.arrayBuffer();
+        const fileData = new Uint8Array(arrayBuffer);
 
-        const fileData = Buffer.from(base64Data, 'base64');
-        const fileName = `${scrapbookId}/${Date.now()}-${index}.jpg`;
+        const contentType = draft.selectedFiles[index]?.type || 'image/jpeg';
+        const ext = contentType.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
+        const fileName = `${scrapbookId}/${index}-${Date.now()}.${ext}`;
 
         const { error: uploadError } = await supabase.storage
             .from('photos')
             .upload(fileName, fileData, {
-                contentType: 'image/jpeg',
+                contentType,
                 cacheControl: '3600',
             });
 
@@ -58,10 +50,38 @@ async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
     await Promise.all(photoPromises);
 }
 
+async function uploadCustomMusic(file: File | null) {
+    if (!file) return null;
+
+    const supabase = createClient();
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'mp3';
+    const safeBase = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9-_]/g, '-');
+    const fileName = `music/${safeBase}-${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('photos')
+        .upload(fileName, file, {
+            contentType: file.type || 'audio/mpeg',
+            cacheControl: '3600',
+        });
+
+    if (uploadError) throw uploadError;
+
+    const {
+        data: { publicUrl },
+    } = supabase.storage.from('photos').getPublicUrl(fileName);
+
+    return publicUrl;
+}
+
 export default function PreviewPage() {
     const router = useRouter();
     const { draft, clearDraft } = useScrapbookStore();
     const [isPublishing, setIsPublishing] = useState(false);
+    const customMusicPreviewUrl = useMemo(() => {
+        if (!draft.customMusicFile) return undefined;
+        return URL.createObjectURL(draft.customMusicFile);
+    }, [draft.customMusicFile]);
 
     useEffect(() => {
         if (
@@ -76,10 +96,9 @@ export default function PreviewPage() {
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             if (!isPublishing) {
-                // Don't show warning if we're publishing
                 e.preventDefault();
-                e.returnValue = ''; // Required for Chrome
-                return ''; // Required for other browsers
+                e.returnValue = '';
+                return '';
             }
         };
 
@@ -88,46 +107,50 @@ export default function PreviewPage() {
             window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [isPublishing]);
 
+    useEffect(() => {
+        return () => {
+            if (customMusicPreviewUrl) {
+                URL.revokeObjectURL(customMusicPreviewUrl);
+            }
+        };
+    }, [customMusicPreviewUrl]);
+
     const handlePublish = async () => {
         setIsPublishing(true);
         try {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { previews, selectedFiles, ...publishData } = draft;
+            const customMusicUrl = await uploadCustomMusic(draft.customMusicFile);
 
-            // Start both operations
-            const scrapbookPromise = fetch('/api/scrapbooks', {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { previews, selectedFiles, customMusicFile, ...publishData } =
+                draft;
+
+            const response = await fetch('/api/scrapbooks', {
                 method: 'POST',
-                body: JSON.stringify(publishData),
+                body: JSON.stringify({ ...publishData, customMusicUrl }),
             });
 
-            // Wait for scrapbook creation first
-            const response = await scrapbookPromise;
             if (!response.ok)
                 throw new Error('Failed to create scrapbook in database');
 
             const { scrapbookId, code } = await response.json();
 
             try {
-                // Try to upload photos
                 await uploadPhotos(scrapbookId, draft);
             } catch (uploadError) {
-                // If photo upload fails, delete the scrapbook
                 await fetch(`/api/scrapbooks?code=${code}`, {
                     method: 'DELETE',
                 });
-                throw new Error('Failed to upload photos: ' + uploadError);
+                throw new Error('Failed to upload assets: ' + uploadError);
             }
 
-            // If we get here, both operations succeeded
             router.replace(`/scrapbook/${code}`);
             await new Promise((resolve) => setTimeout(resolve, 100));
 
-            // Fire confetti!
             confetti({
                 particleCount: 100,
                 spread: 70,
                 origin: { y: 0.6 },
-                colors: ['#ec4899', '#f43f5e', '#fb7185'], // pink shades
+                colors: ['#ec4899', '#f43f5e', '#fb7185'],
             });
 
             toast.success('Scrapbook published successfully!');
@@ -144,9 +167,8 @@ export default function PreviewPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white p-8 md:p-12">
+        <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white px-4 pt-14 pb-8 md:p-12">
             <div className="max-w-4xl mx-auto space-y-6">
-                {/* Top Navigation */}
                 <Button
                     variant="ghost"
                     className="-ml-2 text-gray-600 hover:text-gray-900"
@@ -156,13 +178,9 @@ export default function PreviewPage() {
                     Back to Editor
                 </Button>
 
-                {/* Content Area */}
                 <div className="space-y-6 w-full">
-                    <div className="flex flex-col md:flex-row gap-4 items-center md:justify-between pb-6 border-b w-full">
+                    <div className="flex flex-col md:flex-row gap-4 items-start md:items-center md:justify-between pb-6 border-b w-full">
                         <div className="flex items-center gap-4">
-                            <div className="p-2 bg-pink-50 rounded-xl">
-                                <Eye className="w-8 h-8 text-pink-500" />
-                            </div>
                             <div>
                                 <h1 className="text-4xl font-serif italic text-gray-900">
                                     Preview Your Scrapbook
@@ -172,11 +190,11 @@ export default function PreviewPage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 w-full md:w-auto max-w-[400px]">
-                            {draft.selectedSongId && (
+                        <div className="flex items-center gap-3 w-full md:w-auto">
+                            {(draft.selectedSongId || draft.customMusicFile) && (
                                 <MusicPlayer
-                                    songId={draft.selectedSongId}
-                                    className="bg-white shadow-sm border border-pink-100 rounded-lg"
+                                    songId={draft.selectedSongId ?? undefined}
+                                    src={customMusicPreviewUrl}
                                     autoPlay={true}
                                 />
                             )}

@@ -13,7 +13,7 @@ export function Footer() {
             <div className="max-w-4xl mx-auto px-4">
                 <div className="relative flex flex-col items-center">
                     {/* Social Links - Centered */}
-                    <div className="flex gap-4 mb-8">
+                    <div className="flex gap-4 mb-6">
                         <Link
                             href="https://linkedin.com/in/elijahmuraoka"
                             target="_blank"
@@ -43,27 +43,20 @@ export function Footer() {
                         </Link>
                     </div>
 
-                    {/* Venmo Section */}
-                    <div className="text-center mb-8">
-                        <Link
-                            href="https://venmo.com/?txn=pay&audience=friends&recipients=elijahmuraoka"
-                            target="_blank"
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-rose-500/10 text-pink-600 hover:from-pink-500/20 hover:to-rose-500/20 transition-colors hover:cursor-pointer"
-                        >
-                            <Heart className="w-6 h-6 md:w-4 md:h-4" />
-                            <span className="text-sm">
-                                Please support me so I can buy my girlfriend a
-                                real gift
-                            </span>
-                        </Link>
-                    </div>
-
-                    {/* Copyright */}
-                    <div className="text-center text-xs text-gray-500">
+                    {/* Copyright + Venmo */}
+                    <div className="text-center text-xs text-gray-400 space-y-1">
                         <p>
                             © {new Date().getFullYear()} Creadev. All rights
                             reserved.
                         </p>
+                        <Link
+                            href="https://venmo.com/?txn=pay&audience=friends&recipients=elijahmuraoka"
+                            target="_blank"
+                            className="inline-flex items-center gap-1 text-gray-400 hover:text-pink-500 transition-colors"
+                        >
+                            <Heart className="w-3 h-3" />
+                            <span>Support this project</span>
+                        </Link>
                     </div>
                 </div>
             </div>

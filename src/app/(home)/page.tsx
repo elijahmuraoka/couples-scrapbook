@@ -12,19 +12,12 @@ export default function Home() {
                     <ScrapbookAccess />
                 </div>
             </div>
-            <div className="flex flex-col-reverse lg:flex-col items-center justify-center space-y-8">
+            <div className="flex flex-col items-center justify-center">
                 <Footer />
-                {/* Bio Card - Positioned in Corner */}
-                <div className="lg:absolute lg:bottom-6 lg:right-6 block lg:max-w-[250px] text-center lg:text-left bg-white rounded-lg shadow-md p-4 bg-gradient-to-r from-pink-50 to-rose-50">
-                    <p className="text-sm text-gray-600 italic">
-                        Hey, I&apos;m Elijah! 👋
-                        <br />I built this because my 1-year anniversary is
-                        coming up, and I couldn&apos;t think of a good gift for
-                        my girlfriend. I hope some of you can use this too and
-                        make your partner happy seeing all your memories
-                        together. 😁💖
-                    </p>
-                </div>
+                {/* Bio Card - Subtle, doesn't compete with main CTA */}
+                <p className="mt-6 max-w-xs text-center text-xs text-gray-400 italic leading-relaxed">
+                    Built by Elijah for his 1-year anniversary 💖
+                </p>
             </div>
         </div>
     );
