@@ -1,5 +1,5 @@
 {
-  "currentPhase": 4,
+  "currentPhase": 5,
   "maxPhase": 6,
   "phases": {
     "1": {
@@ -34,20 +34,22 @@
       "commit": "2393608"
     },
     "4": {
-      "status": "pending",
+      "status": "done",
       "description": "Custom audio file upload feature \u2014 creator drops their own MP3",
-      "completed": [],
-      "remaining": [
+      "completed": [
         "Migration 003_custom_music.sql",
-        "Update types (supabase.ts, scrapbook.ts)",
-        "Update Zustand store",
-        "Update MusicPlayer (optional src prop)",
-        "Update MusicSelector (upload UI)",
-        "Wire in create form",
-        "Upload logic in preview/page.tsx",
-        "API route accepts customMusicUrl",
-        "Scrapbook viewer plays custom URL"
-      ]
+        "Add custom_music_url to Supabase and Scrapbook types",
+        "Store now tracks customMusicFile",
+        "MusicPlayer supports optional songId/src with safe audio guard",
+        "MusicSelector adds custom MP3 upload UI and preset/custom mutual exclusion",
+        "Scrapbook form wires custom file handler",
+        "Preview uploads custom audio and sends customMusicUrl in publish payload",
+        "API route validates and stores customMusicUrl",
+        "Scrapbook viewer plays preset or custom music URL"
+      ],
+      "remaining": [],
+      "completedAt": "2026-03-03T12:30:00-05:00",
+      "commit": "5cb957b"
     },
     "5": {
       "status": "pending",
@@ -77,14 +79,14 @@
       ]
     }
   },
-  "lastRunResult": "Phase 3 completed: removed dead orientations state and onLoad orientation bookkeeping from src/components/book-viewer/index.tsx (M5), fixed stuck \"Getting Ready...\" behavior by removing manual isLoading toggle in src/app/(home)/components/scrapbook-access.tsx (M1), and implemented responsive pageflip mode with matchMedia-driven isPortrait plus corrected dot math for portrait vs spread navigation in book-viewer (H3). Build and lint are clean (warnings only). Progress advanced to phase 4.",
-  "lastRunAt": "2026-03-03T12:01:34-05:00",
+  "lastRunResult": "Phase 4 completed: implemented custom music upload end-to-end with new custom_music_url column migration, draft/store typing for custom files, upload UI in create flow, guarded MusicPlayer support for preset or direct URL audio, preview upload to Supabase Storage (music/ prefix), POST payload + API validation/storage for customMusicUrl, and scrapbook viewer playback via src fallback. Build/lint are clean (warnings only). Progress advanced to phase 5.",
+  "lastRunAt": "2026-03-03T12:30:00-05:00",
   "blockers": [],
   "consecutiveBlockerRuns": 0,
   "metrics": {
     "fixesApplied": 8,
     "fixesTotal": 10,
-    "featuresApplied": 0,
+    "featuresApplied": 1,
     "featuresTotal": 1,
     "buildClean": true
   },
