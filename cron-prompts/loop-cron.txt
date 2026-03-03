@@ -6,13 +6,14 @@ FIRST (mandatory, every run):
 3. Read /Users/bob/.openclaw/workspace/repos/couples-scrapbook/KNOWN-ISSUES.md — safety rules and regression risks
 4. cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook && git log --oneline -5 — see what prior runs shipped
 5. cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook && git branch — confirm you're on design-audit
+6. Read /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/context.md — full project context including exact code details for each bug
 
 CRITICAL SAFETY RULES:
 - All work on design-audit branch. Do NOT touch main until Phase 6.
 - Run pnpm build after EVERY set of changes. Never commit if build fails.
 - Read KNOWN-ISSUES.md BEFORE editing any file — it lists regression risks.
 - One commit per phase. Commit message format: "fix: [description] ([bug IDs])" or "feat: [description]"
-- Do NOT run supabase db push — Elijah does that manually.
+- Do NOT run supabase db push — Elijah handles migrations via Supabase SQL Editor.
 - Existing scrapbooks must still work. Never remove or rename the music_id column.
 
 PHASE DISPATCH:
@@ -27,38 +28,51 @@ Read currentPhase from progress.json. Execute ONLY that phase's instructions fro
 - If currentPhase > 6: All done. Update progress.json, send final completion message, exit.
 
 AFTER EACH PHASE (non-negotiable):
-1. Run: pnpm build — must be 0 errors
-2. Run: pnpm lint (or npx eslint src) — 0 errors required (warnings OK)
-3. Commit the changes with a descriptive message
+1. Run: pnpm build — must be 0 errors. If errors, FIX THEM before moving on. Do not just document — actually resolve every build error.
+2. Run: pnpm lint (or npx eslint src) — 0 errors required (warnings OK). If lint errors, FIX THEM.
+3. Commit the code changes with a descriptive message.
 4. Update progress.json:
    - Move current phase status to "done" with completedAt timestamp and commit hash
    - Increment currentPhase by 1
    - Update metrics (fixesApplied, featuresApplied, buildClean)
-   - Set lastRunResult with a summary of what happened
+   - Set lastRunResult with a detailed summary of what was done (not just "done" — list specific changes)
    - Set lastRunAt to current time
+   - Move items from "remaining" to "completed" in the phase
    - Clear blockers if resolved
 5. Commit progress.json: git add progress.json && git commit -m "chore: update progress — phase N complete"
+6. UPDATE SESSION CONTEXT (mandatory after every phase):
+   - Read /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/state.json
+   - Update workingOn, recentDecisions, nextSteps to reflect what just happened
+   - Update recoveryContext with current state so ANY agent opening this session knows exactly what's done and what's left
+   - Read /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/context.md
+   - Append to the "What's Solid" section any new things that are now working
+   - If a bug from the "CRITICAL BUGS" or "SIGNIFICANT ISSUES" section was fixed, mark it with ✅ FIXED and the commit hash
+   - Append to /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/log.md with a timestamped entry: what phase completed, what changed, commit hash
+   - Commit session files: git -C /Users/bob/.openclaw/workspace/repos/personal add sessions/couples-scrapbook/ && git -C /Users/bob/.openclaw/workspace/repos/personal commit -m "chore: session sync couples-scrapbook — phase N complete"
 
 IF STUCK:
-- If a specific item can't be completed, add it to blockers[] in progress.json
+- If a specific item can't be completed, add it to blockers[] in progress.json with a detailed description of WHY it's blocked
 - Increment consecutiveBlockerRuns
-- Move to the next item in the phase's remaining[] list
+- Try the next item in the phase's remaining[] list
 - If ALL items in a phase are blocked, do NOT increment currentPhase — leave it for the audit cron to handle
-- If consecutiveBlockerRuns >= 3, send alert message before doing anything else
+- If consecutiveBlockerRuns >= 3, send ALERT message before doing anything else
 
 RULES:
 - Do NOT skip the FIRST read steps. Every run must re-read progress.json and plan.md.
 - Do NOT work on multiple phases in one run. One phase per run, then exit.
 - Do NOT refactor or "improve" code beyond what the plan specifies. Fix the bugs, add the feature, nothing else.
-- If plan.md says to read a file before editing it, read it.
+- If plan.md says to read a file before editing it, READ IT FIRST.
 - For Phase 4 (custom music): read ALL 10 target files before writing any code. This is a cross-cutting feature.
+- ACTUALLY FIX problems. Do not just document issues or say "this needs fixing." Implement the fix, verify it compiles, commit it.
+- Write back ALL context after every change. Session files must be current for other agents.
 
 COMPLETION CHECK:
 - State which phase was executed
-- State commit hash
+- State commit hash for code changes AND session sync commit hash
 - State pnpm build result (0 errors or list errors)
 - State what was completed vs what remains
 - Confirm progress.json was updated
+- Confirm session files (state.json, context.md, log.md) were updated and committed
 
 ⚠️ MESSAGING (mandatory for every run):
 Send status to BOTH:

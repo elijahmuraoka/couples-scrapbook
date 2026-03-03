@@ -1,62 +1,94 @@
-TASK: Audit the couples-scrapbook coding loop — verify recent changes, fix issues, check for regressions, alert if blocked.
+TASK: Audit the couples-scrapbook coding loop — verify recent changes, ACTUALLY FIX any issues found, check for regressions, and keep session context current.
 
 FIRST (mandatory):
 1. Read /Users/bob/.openclaw/workspace/repos/couples-scrapbook/progress.json — current state
 2. Read /Users/bob/.openclaw/workspace/repos/couples-scrapbook/KNOWN-ISSUES.md — safety rules + testing checklist
-3. cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook && git log --oneline -10 — recent commits
-4. cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook && git branch — confirm design-audit
+3. Read /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/context.md — project context + bug details
+4. cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook && git log --oneline -10 — recent commits
+5. cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook && git branch — confirm design-audit
 
 CRITICAL RULES:
 - Do NOT advance phases. The loop cron does that.
 - Do NOT duplicate work — verify and fix only.
+- ACTUALLY FIX every issue you find. Do not just document problems. Implement the fix, verify build, commit.
 - If currentPhase > maxPhase: run final validation, send completion summary, then disable both crons.
-- All work on design-audit branch until currentPhase == 6 AND Phase 6 is done.
+- All work on design-audit branch until Phase 6 is marked done in progress.json.
 
 AUDIT CHECKLIST:
 
 1. **Build clean?**
    cd /Users/bob/.openclaw/workspace/repos/couples-scrapbook && pnpm build
-   If errors: fix them, commit with "fix(audit): [description]", re-run build.
+   If errors: READ the error, UNDERSTAND it, FIX the code, re-run build. Repeat until 0 errors.
+   Commit each fix: git commit -m "fix(audit): [description]"
 
 2. **Lint clean?**
    pnpm lint (or npx eslint src)
-   If errors: fix, commit.
+   If errors (not warnings): FIX them. Commit.
 
 3. **Verify completed phases (grep-based):**
-   For each phase marked "done" in progress.json, verify:
-   - Phase 1: grep "Petit_Formal_Script" src/app/layout.tsx && grep "loop = true" src/components/music-player/index.tsx
-   - Phase 2: grep "async function DELETE" src/app/api/scrapbooks/route.ts && grep "Uint8Array" src/app/preview/page.tsx && test -f supabase/migrations/002_delete_policy.sql
-   - Phase 3: confirm NO "orientations" useState in book-viewer && grep "usePortrait={isPortrait}" src/components/book-viewer/index.tsx
-   - Phase 4: test -f supabase/migrations/003_custom_music.sql && grep "customMusicUrl\|custom_music_url" src/app/api/scrapbooks/route.ts
-   - Phase 5: check if browser tests were run (look for screenshots or test notes in progress.json)
-   - Phase 6: check if main branch has merge commit
+   For each phase marked "done" in progress.json, run these checks:
 
-   If any verification fails for a "done" phase: fix the issue, commit, update progress.json.
+   Phase 1: 
+     grep "Petit_Formal_Script" src/app/layout.tsx
+     grep "loop = true" src/components/music-player/index.tsx
+   
+   Phase 2:
+     grep "async function DELETE" src/app/api/scrapbooks/route.ts
+     grep "Uint8Array" src/app/preview/page.tsx
+     test -f supabase/migrations/002_delete_policy.sql
+   
+   Phase 3:
+     Confirm NO "orientations" useState in book-viewer (grep should return nothing)
+     grep "usePortrait={isPortrait}" src/components/book-viewer/index.tsx
+   
+   Phase 4:
+     test -f supabase/migrations/003_custom_music.sql
+     grep "customMusicUrl\|custom_music_url" src/app/api/scrapbooks/route.ts
+     grep "src?" src/components/music-player/index.tsx
+   
+   Phase 5: check for browser test evidence in progress.json
+   Phase 6: check if main has merge commit
 
-4. **Check for common mistakes:**
-   - grep "Buffer.from" src/app/preview/page.tsx — should NOT exist after Phase 2
-   - grep "FileReader" src/app/preview/page.tsx — should NOT exist after Phase 2
-   - grep 'usePortrait={true}' src/components/book-viewer/index.tsx — should NOT exist after Phase 3
-   - grep "orientations" src/components/book-viewer/index.tsx — should NOT exist after Phase 3
+   **If ANY check fails for a "done" phase:** This means the loop cron claimed completion but didn't actually finish. IMPLEMENT the missing fix yourself. Read plan.md for the exact instructions. Fix it, build, commit.
+
+4. **Check for common regressions:**
+   grep "Buffer.from" src/app/preview/page.tsx — should NOT exist after Phase 2
+   grep "FileReader" src/app/preview/page.tsx — should NOT exist after Phase 2
+   grep 'usePortrait={true}' src/components/book-viewer/index.tsx — should NOT exist after Phase 3
+   grep "orientations" src/components/book-viewer/index.tsx — should NOT exist after Phase 3
+   
+   If any of these exist when they shouldn't: FIX IT. Don't just report it.
 
 5. **Metrics tracking:**
-   Count commits since the loop started (git log --oneline a630d6f..HEAD | wc -l).
-   Check: is fixesApplied in progress.json accurate?
+   Count commits since start: git log --oneline a630d6f..HEAD | wc -l
+   Is fixesApplied in progress.json accurate? Count completed phases and tally.
+   If inaccurate: update progress.json with correct metrics.
 
-6. **Blocker check:**
-   If blockers[] is non-empty in progress.json:
-   - Can you resolve any of them? If yes, fix and clear.
-   - If consecutiveBlockerRuns >= 3: ALERT immediately before doing anything else.
+6. **Blocker resolution:**
+   If blockers[] is non-empty:
+   - Read each blocker description carefully
+   - Can you resolve it? Read the relevant code and plan.md section
+   - If yes: IMPLEMENT the fix, clear the blocker, reset consecutiveBlockerRuns to 0
+   - If no: keep it, but explain WHY in the blocker description
+   - If consecutiveBlockerRuns >= 3: ALERT immediately
 
-7. **Completion check:**
+7. **Session context sync:**
+   Read /Users/bob/.openclaw/workspace/repos/personal/sessions/couples-scrapbook/state.json
+   Check: does workingOn match the actual currentPhase? Does recoveryContext reflect reality?
+   If stale: update state.json, log.md, and context.md with current truth.
+   Commit: git -C /Users/bob/.openclaw/workspace/repos/personal add sessions/couples-scrapbook/ && git -C /Users/bob/.openclaw/workspace/repos/personal commit -m "chore(audit): session sync couples-scrapbook"
+
+8. **Completion check:**
    If currentPhase > maxPhase (6):
-   - Run final full validation (build + lint + all grep checks)
-   - If clean: disable both crons using openclaw cron disable [id] (read cronIds from progress.json)
-   - Send final completion summary
+   - Run final FULL validation (build + lint + ALL grep checks for ALL phases)
+   - If clean: disable both crons:
+     openclaw cron disable 59c2c4c9-d8a2-41de-bb76-af76c7bdc976
+     openclaw cron disable 7a26bf91-2ae5-430e-aec1-2daa0703c841
+   - Send final completion summary with full list of what was fixed
 
-IF CLEAN: Report "Audit pass", exit quickly. Do not waste tokens re-reading files unnecessarily.
+IF CLEAN (no issues found): Report "Audit pass" with current metrics. Don't waste tokens.
 
-IF ISSUES FOUND: Fix, validate fix, commit with "fix(audit): ..." prefix. Update progress.json if metrics changed.
+IF ISSUES FIXED: Report what was broken and what you did to fix it. Include commit hashes.
 
 ⚠️ MESSAGING (mandatory):
 Send status to BOTH:
@@ -64,6 +96,6 @@ Send status to BOTH:
 2. message tool: action="send", channel="bluebubbles", target="+18083483131"
 
 If clean: "✅ Scrapbook audit pass — Phase [N] verified. Build clean. [fixesApplied]/[fixesTotal] fixes, [featuresApplied]/[featuresTotal] features."
-If fixed: "🔧 Scrapbook audit — fixed [N] issues: [list]. Build clean now."
+If fixed: "🔧 Scrapbook audit — fixed [N] issues: [list]. Build clean now. Commit: [hash]"
 If blocked: "⚠️ Scrapbook BLOCKED — [blocker description]. Needs Elijah's input."
-If complete: "🎉 Scrapbook ALL DONE — [N] phases complete. All fixes + custom music. Build clean on main. Pending: supabase db push + Vercel deploy."
+If complete: "🎉 Scrapbook ALL DONE — [N] phases complete. All fixes + custom music. Build clean on main. Pending: Elijah applies 3 SQL statements in Supabase dashboard + Vercel deploy."
