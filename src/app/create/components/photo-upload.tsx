@@ -9,7 +9,6 @@ import {
     CardTitle,
     CardDescription,
 } from '@/components/ui/card';
-import EXIF from 'exif-js';
 import { useScrapbookStore, generatePhotoId } from '@/store/useScrapbookStore';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
@@ -90,42 +89,11 @@ export function PhotoUpload({
         }
     };
 
-    const extractMetadata = async (file: File) => {
-        return new Promise<{ location?: string; takenAt?: Date }>((resolve) => {
-            EXIF.getData(file as any, function (this: any) {
-                const exifData = EXIF.getAllTags(this);
-
-                // Parse the date properly from EXIF
-                let takenAt: Date | undefined;
-                if (exifData?.DateTimeOriginal) {
-                    // EXIF date format is "YYYY:MM:DD HH:MM:SS"
-                    const [date, time] = exifData.DateTimeOriginal.split(' ');
-                    const [year, month, day] = date.split(':');
-                    const [hour, minute, second] = time.split(':');
-                    takenAt = new Date(
-                        year,
-                        month - 1,
-                        day,
-                        hour,
-                        minute,
-                        second
-                    );
-                } else if (file.lastModified) {
-                    // Fallback to file's last modified date
-                    takenAt = new Date(file.lastModified);
-                }
-
-                resolve({
-                    location: exifData?.GPSLatitude
-                        ? `${exifData.GPSLatitude}, ${exifData.GPSLongitude}`
-                        : undefined,
-                    takenAt:
-                        takenAt && !isNaN(takenAt.getTime())
-                            ? takenAt
-                            : undefined,
-                });
-            });
-        });
+    const extractMetadata = async (file: File): Promise<{ location?: string; takenAt?: Date }> => {
+        const takenAt = file.lastModified ? new Date(file.lastModified) : undefined;
+        return {
+            takenAt: takenAt && !isNaN(takenAt.getTime()) ? takenAt : undefined,
+        };
     };
 
     return (
@@ -148,6 +116,7 @@ export function PhotoUpload({
             <CardContent className="p-8 pt-0">
                 <label
                     htmlFor="file-upload"
+                    aria-label="Upload photos"
                     className="group relative block cursor-pointer transition-all duration-200 bg-gradient-to-b from-pink-50/50 hover:from-pink-100/50"
                 >
                     <div className="border-2 border-dashed border-pink-200 rounded-lg p-8 transition-colors group-hover:border-pink-400">

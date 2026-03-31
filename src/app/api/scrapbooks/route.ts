@@ -1,27 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { nanoid } from 'nanoid';
-import { headers } from 'next/headers';
 
-// ---------------------------------------------------------------------------
-// Simple in-memory rate limiter (per-IP, resets each window)
-// ---------------------------------------------------------------------------
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const RATE_LIMIT_MAX = 5; // max 5 creates per IP per hour
-
-const ipHits = new Map<string, { count: number; resetAt: number }>();
-
-function isRateLimited(ip: string): boolean {
-    const now = Date.now();
-    const entry = ipHits.get(ip);
-
-    if (!entry || now > entry.resetAt) {
-        ipHits.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-        return false;
-    }
-
-    entry.count += 1;
-    return entry.count > RATE_LIMIT_MAX;
-}
+// Rate limiting handled by Vercel/infrastructure layer
 
 // ---------------------------------------------------------------------------
 // Validation helpers
@@ -103,11 +83,11 @@ function validateBody(body: unknown): {
     return {
         ok: true,
         data: {
-            title: b.title as string,
-            note: note as string | null,
-            senderName: senderName as string | null,
-            selectedSongId: selectedSongId as string | null,
-            customMusicUrl: customMusicUrl as string | null,
+            title: String(b.title),
+            note: note !== null ? String(note) : null,
+            senderName: senderName !== null ? String(senderName) : null,
+            selectedSongId: selectedSongId !== null ? String(selectedSongId) : null,
+            customMusicUrl: customMusicUrl !== null ? String(customMusicUrl) : null,
         },
     };
 }
@@ -117,20 +97,6 @@ function validateBody(body: unknown): {
 // ---------------------------------------------------------------------------
 export async function POST(req: Request) {
     try {
-        // Rate limit by IP
-        const hdrs = await headers();
-        const ip =
-            hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-            hdrs.get('x-real-ip') ??
-            'unknown';
-
-        if (isRateLimited(ip)) {
-            return Response.json(
-                { error: 'Too many requests. Please try again later.' },
-                { status: 429 }
-            );
-        }
-
         // Parse & validate
         const body = await req.json();
         const validation = validateBody(body);

@@ -7,9 +7,26 @@ import { BookViewer } from '@/components/book-viewer';
 import { toast } from 'sonner';
 
 export default function ScrapbookMain({ scrapbook }: { scrapbook: Scrapbook }) {
-    const handleShare = () => {
-        navigator.clipboard.writeText(window.location.href);
-        toast.success('Link copied to clipboard!');
+    const handleShare = async () => {
+        const url = window.location.href;
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(url);
+                toast.success('Link copied to clipboard!');
+            } else {
+                const input = document.createElement('input');
+                input.value = url;
+                input.style.position = 'fixed';
+                input.style.opacity = '0';
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                toast.success('Link copied to clipboard!');
+            }
+        } catch {
+            toast.error('Could not copy link. Please copy the URL manually.');
+        }
     };
 
     return (
@@ -35,6 +52,7 @@ export default function ScrapbookMain({ scrapbook }: { scrapbook: Scrapbook }) {
                     )}
                     <Button
                         onClick={handleShare}
+                        aria-label="Share scrapbook link"
                         className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 w-full md:w-auto"
                     >
                         <Share2 className="w-4 h-4 mr-2" />
