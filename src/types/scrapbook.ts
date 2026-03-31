@@ -25,18 +25,20 @@ export interface Scrapbook {
 }
 
 // Helper function to check if data is a Scrapbook
-export function isScrapbook(data: any): data is Scrapbook {
+export function isScrapbook(data: unknown): data is Scrapbook {
+    if (typeof data !== 'object' || data === null) return false;
+    const obj = data as Record<string, unknown>;
     return (
-        typeof data === 'object' &&
-        data !== null &&
-        'id' in data &&
-        'title' in data &&
-        'photos' in data &&
-        'code' in data &&
-        'created_at' in data &&
-        Array.isArray(data.photos) &&
-        data.photos.every(
-            (photo: any) =>
+        'id' in obj &&
+        'title' in obj &&
+        'photos' in obj &&
+        'code' in obj &&
+        'created_at' in obj &&
+        Array.isArray(obj.photos) &&
+        obj.photos.every(
+            (photo: unknown) =>
+                typeof photo === 'object' &&
+                photo !== null &&
                 'id' in photo &&
                 'url' in photo &&
                 'scrapbook_id' in photo &&

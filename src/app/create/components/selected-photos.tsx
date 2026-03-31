@@ -26,6 +26,8 @@ import {
     useSensor,
     useSensors,
     DragOverlay,
+    DragStartEvent,
+    DragEndEvent,
 } from '@dnd-kit/core';
 import {
     arrayMove,
@@ -293,11 +295,11 @@ export function SelectedPhotos({
 
     const [activeId, setActiveId] = useState<string | null>(null);
 
-    const handleDragStart = (event: any) => {
-        setActiveId(event.active.id);
+    const handleDragStart = (event: DragStartEvent) => {
+        setActiveId(event.active.id as string);
     };
 
-    const handleDragEnd = (event: any) => {
+    const handleDragEnd = (event: DragEndEvent) => {
         setActiveId(null);
         const { active, over } = event;
 

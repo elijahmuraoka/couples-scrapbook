@@ -37,7 +37,7 @@ async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
             data: { publicUrl },
         } = supabase.storage.from('photos').getPublicUrl(fileName);
 
-        return supabase.from('photos').insert({
+        const { error: insertError } = await supabase.from('photos').insert({
             scrapbook_id: scrapbookId,
             url: publicUrl,
             order: index,
@@ -45,6 +45,7 @@ async function uploadPhotos(scrapbookId: string, draft: ScrapbookDraft) {
             taken_at: draft.metadata[index]?.takenAt?.toISOString() ?? null,
             location: draft.metadata[index]?.location,
         });
+        if (insertError) throw insertError;
     });
 
     await Promise.all(photoPromises);
@@ -126,6 +127,7 @@ export default function PreviewPage() {
 
             const response = await fetch('/api/scrapbooks', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...publishData, customMusicUrl }),
             });
 
@@ -139,6 +141,7 @@ export default function PreviewPage() {
             } catch (uploadError) {
                 await fetch(`/api/scrapbooks?code=${code}`, {
                     method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
                 });
                 throw new Error('Failed to upload assets: ' + uploadError);
             }

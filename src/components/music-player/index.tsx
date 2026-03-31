@@ -83,6 +83,7 @@ export function MusicPlayer({
     return (
         <Button
             onClick={togglePlay}
+            aria-label={isPlaying ? 'Pause music' : 'Play music'}
             variant="outline"
             size="icon"
             className={cn(
